@@ -13,6 +13,29 @@ pip install lmtools
 
 ## How to use
 
+### Context creation
+
+lmtools has some helpers to make it easier to generate XML context from
+files, for instance
+[`folder2ctx`](https://jph00.github.io/lmtools/xml.html#folder2ctx):
+
+``` python
+print(folder2ctx('samples', prefix=False, file_glob='*.py'))
+```
+
+    <documents>
+    <document index="1">
+    <source>
+    samples/sample_core.py
+    </source>
+    <document_content>
+    import inspect
+    empty = inspect.Parameter.empty
+    models = 'claude-3-opus-20240229','claude-3-sonnet-20240229','claude-3-haiku-20240307'
+    </document_content>
+    </document>
+    </documents>
+
 ### XML helpers
 
 Many language models work well with XML inputs, but XML can be a bit
@@ -20,10 +43,10 @@ clunky to work with manually. Therefore, lmtools includes a couple of
 more streamlined approaches for XML generation.
 
 An XML node contains a tag, optional children, and optional attributes.
-`xt` creates a tuple of these three things, which we will use to general
-XML shortly. Attributes are passed as kwargs; since these might conflict
-with reserved words in Python, you can optionally add a `_` prefix and
-it’ll be stripped off.
+[`xt`](https://jph00.github.io/lmtools/xml.html#xt) creates a tuple of
+these three things, which we will use to general XML shortly. Attributes
+are passed as kwargs; since these might conflict with reserved words in
+Python, you can optionally add a `_` prefix and it’ll be stripped off.
 
 ``` python
 xt('x-custom', ['hi'], _class='bar')
@@ -32,7 +55,8 @@ xt('x-custom', ['hi'], _class='bar')
     ('x-custom', ['hi'], {'class': 'bar'})
 
 Claudette has functions defined for some common HTML elements to create
-`xt` tuples more easily, including these:
+[`xt`](https://jph00.github.io/lmtools/xml.html#xt) tuples more easily,
+including these:
 
 ``` python
 from lmtools.xml import div,img,h1,h2,p,hr,html
@@ -61,9 +85,10 @@ a
        {'class': 'foo'})],
      {})
 
-To convert a tuple data structure created with `xt` and friends into
-XML, use `to_xml`, adding the `hl` parameter to optionally add syntax
-highlighting:
+To convert a tuple data structure created with
+[`xt`](https://jph00.github.io/lmtools/xml.html#xt) and friends into
+XML, use [`to_xml`](https://jph00.github.io/lmtools/xml.html#to_xml),
+adding the `hl` parameter to optionally add syntax highlighting:
 
 ``` python
 to_xml(a, hl=True)
@@ -81,9 +106,11 @@ to_xml(a, hl=True)
 </html>
 ```
 
-JSON doesn’t map as nicely to XML as the `xt` data structure, but for
-simple XML trees it can be convenient. The `json_to_xml` function
-handles that conversion:
+JSON doesn’t map as nicely to XML as the
+[`xt`](https://jph00.github.io/lmtools/xml.html#xt) data structure, but
+for simple XML trees it can be convenient. The
+[`json_to_xml`](https://jph00.github.io/lmtools/xml.html#json_to_xml)
+function handles that conversion:
 
 ``` python
 a = dict(surname='Howard', firstnames=['Jeremy','Peter'],
