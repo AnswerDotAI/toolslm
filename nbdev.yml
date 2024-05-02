@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "lmtools"
+  site-url: "https://jph00.github.io/lmtools"
+  description: "Tools to make language models a bit easier to use"
+  repo-branch: main
+  repo-url: "https://github.com/jph00/lmtools"
