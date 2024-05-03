@@ -3,11 +3,11 @@
 # %% auto 0
 __all__ = ['python']
 
-# %% ../01_code.ipynb 3
-import ast, time, signal
+# %% ../01_code.ipynb 4
+import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_code.ipynb 4
+# %% ../01_code.ipynb 5
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -16,7 +16,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_code.ipynb 6
+# %% ../01_code.ipynb 7
 def _run(code:str ):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -39,13 +39,15 @@ def _run(code:str ):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_code.ipynb 10
+# %% ../01_code.ipynb 11
 def python(code, # Code to execute
            timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
-    "Executes python `code` with `timeout` and returning final expression (similar to IPython)."
+    """Executes python `code` with `timeout` and returning final expression (similar to IPython).
+    Raised exceptions are returned as a string, with a stack trace."""
     def handler(*args): raise TimeoutError()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(timeout)
     try: return _run(code)
+    except Exception as e: return traceback.format_exc()
     finally: signal.alarm(0)
