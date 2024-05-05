@@ -23,11 +23,11 @@ def run_cell(self:TerminalInteractiveShell, cell, timeout=None):
         signal.signal(signal.SIGALRM, handler)
         signal.alarm(timeout)
     try:
-        with capture_output() as io: result = shell.orig_run(cell)
+        with capture_output() as io: result = self.orig_run(cell)
         result.stdout = io.stdout
         return result
     except TimeoutException as e:
-        result = shell.ExecutionResult(error_before_exec=None, error_in_exec=e)
+        result = self.ExecutionResult(error_before_exec=None, error_in_exec=e)
     finally:
         if timeout: signal.alarm(0)
 

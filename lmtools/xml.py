@@ -10,7 +10,8 @@ from collections import namedtuple
 
 from fastcore.utils import *
 from fastcore.meta import delegates
-from IPython import display
+try: from IPython import display
+except: display=None
 
 # %% ../00_xml.ipynb 6
 def xt(tag:str, # XML tag name
