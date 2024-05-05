@@ -2,8 +2,8 @@ project:
   output-dir: _docs
 
 website:
-  title: "lmtool"
-  site-url: "https://AnswerDotAI.github.io/lmtool"
+  title: "toolslm"
+  site-url: "https://AnswerDotAI.github.io/toolslm"
   description: "Tools to make language models a bit easier to use"
   repo-branch: main
-  repo-url: "https://github.com/AnswerDotAI/lmtool"
+  repo-url: "https://github.com/AnswerDotAI/toolslm"
