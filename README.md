@@ -16,8 +16,7 @@ pip install lmtools
 ### Context creation
 
 lmtools has some helpers to make it easier to generate XML context from
-files, for instance
-[`folder2ctx`](https://jph00.github.io/lmtools/xml.html#folder2ctx):
+files, for instance `folder2ctx`:
 
 ``` python
 print(folder2ctx('samples', prefix=False, file_glob='*.py'))
@@ -43,10 +42,10 @@ clunky to work with manually. Therefore, lmtools includes a couple of
 more streamlined approaches for XML generation.
 
 An XML node contains a tag, optional children, and optional attributes.
-[`xt`](https://jph00.github.io/lmtools/xml.html#xt) creates a tuple of
-these three things, which we will use to general XML shortly. Attributes
-are passed as kwargs; since these might conflict with reserved words in
-Python, you can optionally add a `_` prefix and it’ll be stripped off.
+`xt` creates a tuple of these three things, which we will use to general
+XML shortly. Attributes are passed as kwargs; since these might conflict
+with reserved words in Python, you can optionally add a `_` prefix and
+it’ll be stripped off.
 
 ``` python
 xt('x-custom', ['hi'], _class='bar')
@@ -55,8 +54,7 @@ xt('x-custom', ['hi'], _class='bar')
     ('x-custom', ['hi'], {'class': 'bar'})
 
 Claudette has functions defined for some common HTML elements to create
-[`xt`](https://jph00.github.io/lmtools/xml.html#xt) tuples more easily,
-including these:
+`xt` tuples more easily, including these:
 
 ``` python
 from lmtools.xml import div,img,h1,h2,p,hr,html
@@ -85,10 +83,9 @@ a
        {'class': 'foo'})],
      {})
 
-To convert a tuple data structure created with
-[`xt`](https://jph00.github.io/lmtools/xml.html#xt) and friends into
-XML, use [`to_xml`](https://jph00.github.io/lmtools/xml.html#to_xml),
-adding the `hl` parameter to optionally add syntax highlighting:
+To convert a tuple data structure created with `xt` and friends into
+XML, use `to_xml`, adding the `hl` parameter to optionally add syntax
+highlighting:
 
 ``` python
 to_xml(a, hl=True)
@@ -106,11 +103,9 @@ to_xml(a, hl=True)
 </html>
 ```
 
-JSON doesn’t map as nicely to XML as the
-[`xt`](https://jph00.github.io/lmtools/xml.html#xt) data structure, but
-for simple XML trees it can be convenient. The
-[`json_to_xml`](https://jph00.github.io/lmtools/xml.html#json_to_xml)
-function handles that conversion:
+JSON doesn’t map as nicely to XML as the `xt` data structure, but for
+simple XML trees it can be convenient. The `json_to_xml` function
+handles that conversion:
 
 ``` python
 a = dict(surname='Howard', firstnames=['Jeremy','Peter'],

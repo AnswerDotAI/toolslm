@@ -2,8 +2,8 @@
 
 d = { 'settings': { 'branch': 'main',
                 'doc_baseurl': '/lmtools',
-                'doc_host': 'https://jph00.github.io',
-                'git_url': 'https://github.com/jph00/lmtools',
+                'doc_host': 'https://AnswerDotAI.github.io',
+                'git_url': 'https://github.com/AnswerDotAI/lmtools',
                 'lib_path': 'lmtools'},
   'syms': { 'lmtools.code': { 'lmtools.code._copy_loc': ('code.html#_copy_loc', 'lmtools/code.py'),
                               'lmtools.code._run': ('code.html#_run', 'lmtools/code.py'),

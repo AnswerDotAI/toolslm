@@ -3,7 +3,7 @@ project:
 
 website:
   title: "lmtools"
-  site-url: "https://jph00.github.io/lmtools"
+  site-url: "https://AnswerDotAI.github.io/lmtools"
   description: "Tools to make language models a bit easier to use"
   repo-branch: main
-  repo-url: "https://github.com/jph00/lmtools"
+  repo-url: "https://github.com/AnswerDotAI/lmtools"
