@@ -23,7 +23,7 @@ def xt(tag:str, # XML tag name
 
 # %% ../00_xml.ipynb 9
 g = globals()
-tags = 'div img h1 h2 h3 h4 h5 p hr span html'.split()
+tags = 'div img h1 h2 h3 h4 h5 p hr span html ol ul li'.split()
 for o in tags: g[o] = partial(xt, o)
 
 # %% ../00_xml.ipynb 12

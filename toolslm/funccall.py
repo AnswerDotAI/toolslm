@@ -29,7 +29,7 @@ def _param(name, info):
     return pschema
 
 # %% ../01_funccall.ipynb 17
-def get_schema(f:callable)->dict:
+def get_schema(f:callable, pname='input_schema')->dict:
     "Convert function `f` into a JSON schema `dict` for tool use."
     d = docments(f, full=True)
     ret = d.pop('return')
@@ -40,9 +40,10 @@ def get_schema(f:callable)->dict:
         'required': [n for n,o in d.items() if o.default is empty and n[0]!='_']
     }
     desc = f.__doc__
+    assert desc, "Docstring missing!"
     if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
     if ret.docment: desc += f'\n- description: {ret.docment}'
-    return dict(name=f.__name__, description=desc or "", input_schema=paramd)
+    return {'name':f.__name__, 'description':desc, pname:paramd}
 
 # %% ../01_funccall.ipynb 22
 import ast, time, signal, traceback
