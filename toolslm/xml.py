@@ -11,6 +11,7 @@ from fastcore.utils import *
 from fastcore.meta import delegates
 from fastcore.xtras import hl_md
 from fastcore.xml import to_xml, Document, Documents, Document_content, Source
+from fastcore.script import call_parse, Param, store_false
 try: from IPython import display
 except: display=None
 
@@ -91,9 +92,10 @@ def files2ctx(
     return docs_xml(contents, fnames, prefix=prefix)
 
 # %% ../00_xml.ipynb 32
+@call_parse
 @delegates(globtastic)
 def folder2ctx(
-    folder:Union[str,Path], # Folder name containing files to add to context
+    folder:str, # Folder name (str or Path) containing files to add to context
     prefix:bool=True, # Include Anthropic's suggested prose intro?
     **kwargs # Passed to `globtastic`
 )->str: # XML for Claude context
