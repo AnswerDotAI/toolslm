@@ -105,6 +105,8 @@ def folder2ctx(
 @call_parse
 @delegates(folder2ctx)
 def folder2ctx_cli(
+    folder:str, # Folder name containing files to add to context
+    prefix:bool=True, # Include Anthropic's suggested prose intro?
     **kwargs # Passed to `folder2ctx`
 )->str: # XML for Claude context
-    return folder2ctx(**kwargs)
+    return folder2ctx(folder, prefix, **kwargs)
