@@ -103,11 +103,8 @@ def folder2ctx(
 
 # %% ../00_xml.ipynb 34
 @call_parse
-@delegates(globtastic)
+@delegates(folder2ctx)
 def folder2ctx_cli(
-    folder:str, # Folder name containing files to add to context
-    prefix:bool=True, # Include Anthropic's suggested prose intro?
-    **kwargs # Passed to `globtastic`
+    **kwargs # Passed to `folder2ctx`
 )->str: # XML for Claude context
-    fnames = globtastic(folder, **kwargs)
-    return files2ctx(fnames, prefix=prefix)
+    return folder2ctx(**kwargs)
