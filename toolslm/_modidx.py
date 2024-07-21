@@ -18,6 +18,7 @@ d = { 'settings': { 'branch': 'main',
                              'toolslm.xml.docs_xml': ('xml.html#docs_xml', 'toolslm/xml.py'),
                              'toolslm.xml.files2ctx': ('xml.html#files2ctx', 'toolslm/xml.py'),
                              'toolslm.xml.folder2ctx': ('xml.html#folder2ctx', 'toolslm/xml.py'),
+                             'toolslm.xml.folder2ctx_cli': ('xml.html#folder2ctx_cli', 'toolslm/xml.py'),
                              'toolslm.xml.json_to_xml': ('xml.html#json_to_xml', 'toolslm/xml.py'),
                              'toolslm.xml.mk_doc': ('xml.html#mk_doc', 'toolslm/xml.py'),
                              'toolslm.xml.mk_doctype': ('xml.html#mk_doctype', 'toolslm/xml.py')}}}
