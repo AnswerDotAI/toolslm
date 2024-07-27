@@ -54,18 +54,18 @@ def mk_doc(index:int,  # The document index
            content:str,  # The document content
            source:Optional[str]=None # URL, filename, etc; defaults to `md5(content)` if not provided
           ) -> tuple:
-    "Create an `xt` format tuple for a single doc in Anthropic's recommended format"
+    "Create an `ft` format tuple for a single doc in Anthropic's recommended format"
     dt = mk_doctype(content, source)
-    content = xt('document_content', dt.content)
-    source =  xt('source', dt.source)
-    return xt('document', source, content, index=index)
+    content = ft('document_content', dt.content)
+    source =  ft('source', dt.source)
+    return ft('document', source, content, index=index)
 
 # %% ../00_xml.ipynb 18
 def mk_doc(index:int,  # The document index
            content:str,  # The document content
            source:Optional[str]=None # URL, filename, etc; defaults to `md5(content)` if not provided
           ) -> tuple:
-    "Create an `xt` format tuple for a single doc in Anthropic's recommended format"
+    "Create an `ft` format tuple for a single doc in Anthropic's recommended format"
     dt = mk_doctype(content, source)
     content = Document_content(dt.content)
     source = Source(dt.source)
