@@ -37,6 +37,7 @@ doctype = namedtuple('doctype', ['source', 'content'])
 # %% ../00_xml.ipynb 11
 def _add_nls(s):
     "Add newlines to start and end of `s` if missing"
+    if not s: return s
     if s[ 0]!='\n': s = '\n'+s
     if s[-1]!='\n': s = s+'\n'
     return s
