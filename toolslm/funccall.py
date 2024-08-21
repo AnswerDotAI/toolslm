@@ -16,6 +16,7 @@ def _types(t:type)->tuple[str,Optional[str]]:
     "Tuple of json schema type name and (if appropriate) array item name."
     if t is empty: raise TypeError('Missing type')
     tmap = {int:"integer", float:"number", str:"string", bool:"boolean", list:"array", dict:"object"}
+    tmap.update({k.__name__: v for k, v in tmap.items()})
     if getattr(t, '__origin__', None) in  (list,tuple): return "array", tmap.get(t.__args__[0], "object")
     else: return tmap[t], None
 
@@ -45,11 +46,11 @@ def get_schema(f:callable, pname='input_schema')->dict:
     if ret.docment: desc += f'\n- description: {ret.docment}'
     return {'name':f.__name__, 'description':desc, pname:paramd}
 
-# %% ../01_funccall.ipynb 22
+# %% ../01_funccall.ipynb 24
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_funccall.ipynb 23
+# %% ../01_funccall.ipynb 25
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -58,7 +59,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_funccall.ipynb 25
+# %% ../01_funccall.ipynb 27
 def _run(code:str ):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -81,7 +82,7 @@ def _run(code:str ):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_funccall.ipynb 30
+# %% ../01_funccall.ipynb 32
 def python(code, # Code to execute
            timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
