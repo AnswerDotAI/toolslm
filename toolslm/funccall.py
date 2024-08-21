@@ -15,6 +15,7 @@ empty = inspect.Parameter.empty
 def _types(t:type)->tuple[str,Optional[str]]:
     "Tuple of json schema type name and (if appropriate) array item name."
     if t is empty: raise TypeError('Missing type')
+    if isinstance(t, str): t = eval(t)
     tmap = {int:"integer", float:"number", str:"string", bool:"boolean", list:"array", dict:"object"}
     if getattr(t, '__origin__', None) in  (list,tuple): return "array", tmap.get(t.__args__[0], "object")
     else: return tmap[t], None
