@@ -50,40 +50,32 @@ def mk_doctype(content:str,  # The document content
     if source is None: source = hashlib.md5(content.encode()).hexdigest()[:8]
     return doctype(_add_nls(str(source).strip()), _add_nls(content.strip()))
 
-# %% ../00_xml.ipynb 17
+# %% ../00_xml.ipynb 16
 def mk_doc(index:int,  # The document index
            content:str,  # The document content
-           source:Optional[str]=None # URL, filename, etc; defaults to `md5(content)` if not provided
-          ) -> tuple:
-    "Create an `ft` format tuple for a single doc in Anthropic's recommended format"
-    dt = mk_doctype(content, source)
-    content = ft('document_content', dt.content)
-    source =  ft('source', dt.source)
-    return ft('document', source, content, index=index)
-
-# %% ../00_xml.ipynb 18
-def mk_doc(index:int,  # The document index
-           content:str,  # The document content
-           source:Optional[str]=None # URL, filename, etc; defaults to `md5(content)` if not provided
+           source:Optional[str]=None, # URL, filename, etc; defaults to `md5(content)` if not provided
+           **kwargs
           ) -> tuple:
     "Create an `ft` format tuple for a single doc in Anthropic's recommended format"
     dt = mk_doctype(content, source)
     content = Document_content(dt.content)
     source = Source(dt.source)
-    return Document(source, content, index=index)
+    return Document(source, content, index=index, **kwargs)
 
-# %% ../00_xml.ipynb 22
+# %% ../00_xml.ipynb 19
 def docs_xml(docs:list[str],  # The content of each document
              sources:Optional[list]=None,  # URLs, filenames, etc; each one defaults to `md5(content)` if not provided
-             prefix:bool=True # Include Anthropic's suggested prose intro?
+             prefix:bool=True, # Include Anthropic's suggested prose intro?
+             details:Optional[list]=None # Optional list of dicts with additional attrs for each doc
             )->str:
     "Create an XML string containing `docs` in Anthropic's recommended format"
     pre = 'Here are some documents for you to reference for your task:\n\n' if prefix else ''
     if sources is None: sources = [None]*len(docs)
-    docs = (mk_doc(i+1, *o) for i,o in enumerate(zip(docs,sources)))
+    if details is None: details = [{}]*len(docs)
+    docs = (mk_doc(i+1, d, s, **kw) for i,(d,s,kw) in enumerate(zip(docs,sources,details)))
     return pre + to_xml(Documents(docs))
 
-# %% ../00_xml.ipynb 29
+# %% ../00_xml.ipynb 26
 def files2ctx(
     fnames:list[Union[str,Path]], # List of file names to add to context
     prefix:bool=True # Include Anthropic's suggested prose intro?
@@ -92,7 +84,7 @@ def files2ctx(
     contents = [o.read_text() for o in fnames]
     return docs_xml(contents, fnames, prefix=prefix)
 
-# %% ../00_xml.ipynb 32
+# %% ../00_xml.ipynb 29
 @delegates(globtastic)
 def folder2ctx(
     folder:Union[str,Path], # Folder name containing files to add to context
@@ -102,7 +94,7 @@ def folder2ctx(
     fnames = globtastic(folder, **kwargs)
     return files2ctx(fnames, prefix=prefix)
 
-# %% ../00_xml.ipynb 34
+# %% ../00_xml.ipynb 31
 @call_parse
 @delegates(folder2ctx)
 def folder2ctx_cli(
