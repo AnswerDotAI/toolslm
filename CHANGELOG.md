@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.0.6
+
+### New Features
+
+- Add `read_docs` and `find_docs` ([#8](https://github.com/AnswerDotAI/toolslm/issues/8))
+
+
 ## 0.0.5
 
 ### Bugs Squashed
