@@ -7,6 +7,7 @@ __all__ = ['clean_md', 'read_md', 'html2md', 'read_html', 'get_llmstxt', 'split_
 from fastcore.utils import *
 from httpx import get
 from fastcore.meta import delegates
+from fastcore.test import *
 from llms_txt import *
 
 from html2text import HTML2Text
@@ -90,8 +91,11 @@ def find_docs(url):
 # %% ../03_download.ipynb 19
 def read_docs(url, optional=False, n_workers=None, rm_comments=True, rm_details=True):
     "If available, return LLM-friendly llms.txt context or markdown file response for `url`"
-    url = find_docs(url)
-    if not url: return
-    if url.endswith('/llms.txt'): res = get_llmstxt(url, optional=optional, n_workers=n_workers)
-    else: res = get(url).text
+    fn = find_docs(url)
+    if not fn:
+        parsed_url = urlparse(url)
+        if parsed_url.path == '/' or not parsed_url.path: return None
+        return read_docs(urljoin(url, '..'), optional, n_workers, rm_comments, rm_details)
+    if fn.endswith('/llms.txt'): res = get_llmstxt(fn, optional=optional, n_workers=n_workers)
+    else: res = get(fn).text
     return clean_md(res, rm_comments=rm_comments, rm_details=rm_details)
