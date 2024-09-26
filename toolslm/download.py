@@ -13,20 +13,20 @@ from html2text import HTML2Text
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
-# %% ../03_download.ipynb 5
+# %% ../03_download.ipynb 4
 def clean_md(text, rm_comments=True, rm_details=True):
     "Remove comments and `<details>` sections from `text`"
     if rm_comments: text = re.sub(r'\n?<!--.*?-->\n?', '', text, flags=re.DOTALL)
     if rm_details: text = re.sub(r'\n?<details>.*?</details>\n?', '', text, flags=re.DOTALL)
     return text
 
-# %% ../03_download.ipynb 6
+# %% ../03_download.ipynb 5
 @delegates(get)
 def read_md(url, rm_comments=True, rm_details=True, **kwargs):
     "Read text from `url` and clean with `clean_docs`"
     return clean_md(get(url, **kwargs).text, rm_comments=rm_comments, rm_details=rm_details)
 
-# %% ../03_download.ipynb 8
+# %% ../03_download.ipynb 7
 def html2md(s:str):
     "Convert `s` from HTML to markdown"
     o = HTML2Text(bodywidth=5000)
@@ -35,7 +35,7 @@ def html2md(s:str):
     o.ignore_images = True
     return o.handle(s)
 
-# %% ../03_download.ipynb 9
+# %% ../03_download.ipynb 8
 def read_html(url, # URL to read
               sel=None, # Read only outerHTML of CSS selector `sel`
               rm_comments=True, # Removes HTML comments
@@ -45,7 +45,7 @@ def read_html(url, # URL to read
     page = get(url).text
     if sel:
         soup = BeautifulSoup(page, 'html.parser')
-        page = str(soup.find(sel))
+        page = ''.join(str(el) for el in soup.select(sel))
     md = html2md(page)
     return clean_md(md, rm_comments, rm_details=rm_details)
 
