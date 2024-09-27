@@ -35,7 +35,7 @@ def html2md(s:str):
     o.ignore_images = True
     return o.handle(s)
 
-# %% ../03_download.ipynb 14
+# %% ../03_download.ipynb 8
 def read_html(url, # URL to read
               sel=None, # Read only outerHTML of CSS selector `sel`
               rm_comments=True, # Removes HTML comments
@@ -56,7 +56,7 @@ def read_html(url, # URL to read
     else: return'\n'.join(mds)
 
 
-# %% ../03_download.ipynb 18
+# %% ../03_download.ipynb 12
 def get_llmstxt(url, optional=False, n_workers=None):
     "Get llms.txt file from and expand it with `llms_txt.create_ctx()`"
     if not url.endswith('llms.txt'): return None
@@ -64,7 +64,7 @@ def get_llmstxt(url, optional=False, n_workers=None):
     if resp.status_code!=200: return None
     return create_ctx(resp.text, optional=optional, n_workers=n_workers)
 
-# %% ../03_download.ipynb 20
+# %% ../03_download.ipynb 14
 def split_url(url):
     "Split `url` into base, path, and file name, normalising name to '/' if empty"
     parsed = urlparse(url.strip('/'))
@@ -74,13 +74,13 @@ def split_url(url):
     if not path and not fname: path='/'
     return base,path,fname
 
-# %% ../03_download.ipynb 22
+# %% ../03_download.ipynb 16
 def _tryget(url):
     "Return response from `url` if `status_code!=404`, otherwise `None`"
     res = get(url)
     return None if res.status_code==404 else url
 
-# %% ../03_download.ipynb 23
+# %% ../03_download.ipynb 17
 def find_docs(url):
     "If available, return LLM-friendly llms.txt context or markdown file location from `url`"
     base,path,fname = split_url(url)
@@ -100,7 +100,7 @@ def find_docs(url):
     if parsed_url.path == '/' or not parsed_url.path: return None
     return find_docs(urljoin(url, '..'))
 
-# %% ../03_download.ipynb 29
+# %% ../03_download.ipynb 23
 def read_docs(url, optional=False, n_workers=None, rm_comments=True, rm_details=True):
     "If available, return LLM-friendly llms.txt context or markdown file response for `url`"
     url = find_docs(url)
