@@ -30,40 +30,44 @@ def _param(name, info):
     if info.default is not empty: pschema["default"] = info.default
     return pschema
 
-# %% ../01_funccall.ipynb 20
+# %% ../01_funccall.ipynb 19
 def _get_nested_schema(obj):
     "Generate nested JSON schema for a class or function"
     d = docments(obj, full=True)
     props,req,defs = {},{},{}
+    
+    def handle_type(t):
+        if isinstance(t, type) and not issubclass(t, (int, float, str, bool)):
+            defs[t.__name__] = _get_nested_schema(t)
+            return {'$ref': f'#/$defs/{t.__name__}'}
+        return {'type': _types(t)[0]}
+    
     for n,o in d.items():
         if n == 'return': continue
         props[n] = p = _param(n,o)
         if o.default is empty: req[n] = True
         
-        def handle_nested(t):
-            if isinstance(t, type) and not issubclass(t, (int, float, str, bool)):
-                defs[t.__name__] = _get_nested_schema(t)
-                return {'$ref': f'#/$defs/{t.__name__}'}
-            return None
-        
         if hasattr(o.anno, '__origin__'):
-            if o.anno.__origin__ is dict:
-                nested = handle_nested(o.anno.__args__[1])
-                if nested: p['additionalProperties'] = nested
-            elif o.anno.__origin__ in (list, tuple):
-                nested = handle_nested(o.anno.__args__[0])
-                if nested: p['items'] = nested
+            origin, args = o.anno.__origin__, o.anno.__args__
+            if origin is dict:
+                p['type'] = 'object'
+                value_type = args[1].__args__[0] if hasattr(args[1], '__args__') else args[1]
+                p['additionalProperties'] = (
+                    {'type': 'array', 'items': handle_type(value_type)}
+                    if hasattr(args[1], '__origin__') else handle_type(args[1])
+                )
+            elif origin in (list, tuple):
+                p['type'] = 'array'
+                p['items'] = handle_type(args[0])
         else:
-            nested = handle_nested(o.anno)
-            if nested: p.update(nested)
+            p.update(handle_type(o.anno))
     
-    schema = dict(type='object', properties=props)
-    if isinstance(obj, type): schema['title'] = obj.__name__
+    schema = dict(type='object', properties=props, title=obj.__name__ if isinstance(obj, type) else None)
     if req: schema['required'] = list(req)
     if defs: schema['$defs'] = defs
     return schema
 
-# %% ../01_funccall.ipynb 21
+# %% ../01_funccall.ipynb 20
 def get_schema(f:callable, pname='input_schema')->dict:
     "Generate JSON schema for a class, function, or method"
     schema = _get_nested_schema(f)
@@ -74,11 +78,11 @@ def get_schema(f:callable, pname='input_schema')->dict:
     if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
     return {"name": f.__name__, "description": desc, pname: schema}
 
-# %% ../01_funccall.ipynb 32
+# %% ../01_funccall.ipynb 30
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_funccall.ipynb 33
+# %% ../01_funccall.ipynb 31
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -87,7 +91,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_funccall.ipynb 35
+# %% ../01_funccall.ipynb 33
 def _run(code:str ):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -110,7 +114,7 @@ def _run(code:str ):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_funccall.ipynb 40
+# %% ../01_funccall.ipynb 38
 def python(code, # Code to execute
            timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
