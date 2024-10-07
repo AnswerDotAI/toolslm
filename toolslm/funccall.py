@@ -81,7 +81,7 @@ def _get_nested_schema(obj):
     if defs: schema['$defs'] = defs
     return schema
 
-# %% ../01_funccall.ipynb 23
+# %% ../01_funccall.ipynb 26
 def get_schema(f:callable, pname='input_schema')->dict:
     "Generate JSON schema for a class, function, or method"
     schema = _get_nested_schema(f)
@@ -92,11 +92,11 @@ def get_schema(f:callable, pname='input_schema')->dict:
     if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
     return {"name": f.__name__, "description": desc, pname: schema}
 
-# %% ../01_funccall.ipynb 33
+# %% ../01_funccall.ipynb 36
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_funccall.ipynb 34
+# %% ../01_funccall.ipynb 37
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -105,7 +105,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_funccall.ipynb 36
+# %% ../01_funccall.ipynb 39
 def _run(code:str ):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -128,7 +128,7 @@ def _run(code:str ):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_funccall.ipynb 41
+# %% ../01_funccall.ipynb 44
 def python(code, # Code to execute
            timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
