@@ -58,7 +58,7 @@ def get_schema(f:callable, pname='input_schema')->dict:
     d = docments(f, full=True)
     ret = d.pop('return')
     if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
-    return dict(name=f.__name__, description=desc, pname=schema)
+    return {"name": f.__name__, "description": desc, pname: schema}
 
 # %% ../01_funccall.ipynb 30
 import ast, time, signal, traceback
