@@ -17,10 +17,11 @@ def _types(t:type)->tuple[str,Optional[str]]:
     if t is empty: raise TypeError('Missing type')
     tmap = {int:"integer", float:"number", str:"string", bool:"boolean", list:"array", dict:"object"}
     tmap.update({k.__name__: v for k, v in tmap.items()})
-    if getattr(t, '__origin__', None) in  (list,tuple): return "array", tmap.get(t.__args__[0], "object")
-    else: return tmap[t], None
+    if getattr(t, '__origin__', None) in (list,tuple): return "array", tmap.get(t.__args__[0].__name__, "object")
+    elif isinstance(t, str): return tmap.get(t, "object"), None
+    else: return tmap.get(t.__name__, "object"), None
 
-# %% ../01_funccall.ipynb 14
+# %% ../01_funccall.ipynb 16
 def _param(name, info):
     "json schema parameter given `name` and `info` from docments full dict."
     paramt,itemt = _types(info.anno)
@@ -29,28 +30,76 @@ def _param(name, info):
     if info.default is not empty: pschema["default"] = info.default
     return pschema
 
-# %% ../01_funccall.ipynb 17
+# %% ../01_funccall.ipynb 19
+def _handle_type(t, defs):
+    "Handle a single type, creating nested schemas if necessary"
+    if isinstance(t, type) and not issubclass(t, (int, float, str, bool)):
+        defs[t.__name__] = _get_nested_schema(t)
+        return {'$ref': f'#/$defs/{t.__name__}'}
+    return {'type': _types(t)[0]}
+
+# %% ../01_funccall.ipynb 20
+def _handle_container(origin, args, defs):
+    "Handle container types like dict, list, tuple, set"
+    if origin is dict:
+        value_type = args[1].__args__[0] if hasattr(args[1], '__args__') else args[1]
+        return {
+            'type': 'object',
+            'additionalProperties': (
+                {'type': 'array', 'items': _handle_type(value_type, defs)}
+                if hasattr(args[1], '__origin__') else _handle_type(args[1], defs)
+            )
+        }
+    elif origin in (list, tuple, set):
+        schema = {'type': 'array', 'items': _handle_type(args[0], defs)}
+        if origin is set:
+            schema['uniqueItems'] = True
+        return schema
+    return None
+
+# %% ../01_funccall.ipynb 21
+def _process_property(name, obj, props, req, defs):
+    "Process a single property of the schema"
+    p = _param(name, obj)
+    props[name] = p
+    if obj.default is empty: req[name] = True
+    
+    if hasattr(obj.anno, '__origin__'):
+        p.update(_handle_container(obj.anno.__origin__, obj.anno.__args__, defs))
+    else:
+        p.update(_handle_type(obj.anno, defs))
+
+# %% ../01_funccall.ipynb 22
+def _get_nested_schema(obj):
+    "Generate nested JSON schema for a class or function"
+    d = docments(obj, full=True)
+    props, req, defs = {}, {}, {}
+    
+    for n, o in d.items():
+        if n != 'return':
+            _process_property(n, o, props, req, defs)
+    
+    schema = dict(type='object', properties=props, title=obj.__name__ if isinstance(obj, type) else None)
+    if req: schema['required'] = list(req)
+    if defs: schema['$defs'] = defs
+    return schema
+
+# %% ../01_funccall.ipynb 26
 def get_schema(f:callable, pname='input_schema')->dict:
-    "Convert function `f` into a JSON schema `dict` for tool use."
-    d = docments(f, full=True)
-    ret = d.pop('return')
-    d.pop('self', None) # Ignore `self` for methods
-    paramd = {
-        'type': "object",
-        'properties': {n:_param(n,o) for n,o in d.items() if n[0]!='_'},
-        'required': [n for n,o in d.items() if o.default is empty and n[0]!='_']
-    }
+    "Generate JSON schema for a class, function, or method"
+    schema = _get_nested_schema(f)
     desc = f.__doc__
     assert desc, "Docstring missing!"
+    d = docments(f, full=True)
+    ret = d.pop('return')
     if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
-    if ret.docment: desc += f'\n- description: {ret.docment}'
-    return {'name':f.__name__, 'description':desc, pname:paramd}
+    return {"name": f.__name__, "description": desc, pname: schema}
 
-# %% ../01_funccall.ipynb 24
+# %% ../01_funccall.ipynb 37
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_funccall.ipynb 25
+# %% ../01_funccall.ipynb 38
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -59,7 +108,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_funccall.ipynb 27
+# %% ../01_funccall.ipynb 40
 def _run(code:str ):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -82,7 +131,7 @@ def _run(code:str ):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_funccall.ipynb 32
+# %% ../01_funccall.ipynb 45
 def python(code, # Code to execute
            timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
