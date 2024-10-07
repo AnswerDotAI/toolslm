@@ -31,43 +31,57 @@ def _param(name, info):
     return pschema
 
 # %% ../01_funccall.ipynb 19
+def _handle_type(t, defs):
+    "Handle a single type, creating nested schemas if necessary"
+    if isinstance(t, type) and not issubclass(t, (int, float, str, bool)):
+        defs[t.__name__] = _get_nested_schema(t)
+        return {'$ref': f'#/$defs/{t.__name__}'}
+    return {'type': _types(t)[0]}
+
+# %% ../01_funccall.ipynb 20
+def _handle_container(origin, args, defs):
+    "Handle container types like dict, list, tuple"
+    if origin is dict:
+        value_type = args[1].__args__[0] if hasattr(args[1], '__args__') else args[1]
+        return {
+            'type': 'object',
+            'additionalProperties': (
+                {'type': 'array', 'items': _handle_type(value_type, defs)}
+                if hasattr(args[1], '__origin__') else _handle_type(args[1], defs)
+            )
+        }
+    elif origin in (list, tuple):
+        return {'type': 'array', 'items': _handle_type(args[0], defs)}
+    return None
+
+# %% ../01_funccall.ipynb 21
+def _process_property(name, obj, props, req, defs):
+    "Process a single property of the schema"
+    p = _param(name, obj)
+    props[name] = p
+    if obj.default is empty: req[name] = True
+    
+    if hasattr(obj.anno, '__origin__'):
+        p.update(_handle_container(obj.anno.__origin__, obj.anno.__args__, defs))
+    else:
+        p.update(_handle_type(obj.anno, defs))
+
+# %% ../01_funccall.ipynb 22
 def _get_nested_schema(obj):
     "Generate nested JSON schema for a class or function"
     d = docments(obj, full=True)
-    props,req,defs = {},{},{}
+    props, req, defs = {}, {}, {}
     
-    def handle_type(t):
-        if isinstance(t, type) and not issubclass(t, (int, float, str, bool)):
-            defs[t.__name__] = _get_nested_schema(t)
-            return {'$ref': f'#/$defs/{t.__name__}'}
-        return {'type': _types(t)[0]}
-    
-    for n,o in d.items():
-        if n == 'return': continue
-        props[n] = p = _param(n,o)
-        if o.default is empty: req[n] = True
-        
-        if hasattr(o.anno, '__origin__'):
-            origin, args = o.anno.__origin__, o.anno.__args__
-            if origin is dict:
-                p['type'] = 'object'
-                value_type = args[1].__args__[0] if hasattr(args[1], '__args__') else args[1]
-                p['additionalProperties'] = (
-                    {'type': 'array', 'items': handle_type(value_type)}
-                    if hasattr(args[1], '__origin__') else handle_type(args[1])
-                )
-            elif origin in (list, tuple):
-                p['type'] = 'array'
-                p['items'] = handle_type(args[0])
-        else:
-            p.update(handle_type(o.anno))
+    for n, o in d.items():
+        if n != 'return':
+            _process_property(n, o, props, req, defs)
     
     schema = dict(type='object', properties=props, title=obj.__name__ if isinstance(obj, type) else None)
     if req: schema['required'] = list(req)
     if defs: schema['$defs'] = defs
     return schema
 
-# %% ../01_funccall.ipynb 20
+# %% ../01_funccall.ipynb 23
 def get_schema(f:callable, pname='input_schema')->dict:
     "Generate JSON schema for a class, function, or method"
     schema = _get_nested_schema(f)
@@ -78,11 +92,11 @@ def get_schema(f:callable, pname='input_schema')->dict:
     if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
     return {"name": f.__name__, "description": desc, pname: schema}
 
-# %% ../01_funccall.ipynb 30
+# %% ../01_funccall.ipynb 33
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_funccall.ipynb 31
+# %% ../01_funccall.ipynb 34
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -91,7 +105,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_funccall.ipynb 33
+# %% ../01_funccall.ipynb 36
 def _run(code:str ):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -114,7 +128,7 @@ def _run(code:str ):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_funccall.ipynb 38
+# %% ../01_funccall.ipynb 41
 def python(code, # Code to execute
            timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
