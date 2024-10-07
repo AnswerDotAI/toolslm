@@ -40,7 +40,7 @@ def _handle_type(t, defs):
 
 # %% ../01_funccall.ipynb 20
 def _handle_container(origin, args, defs):
-    "Handle container types like dict, list, tuple"
+    "Handle container types like dict, list, tuple, set"
     if origin is dict:
         value_type = args[1].__args__[0] if hasattr(args[1], '__args__') else args[1]
         return {
@@ -50,8 +50,11 @@ def _handle_container(origin, args, defs):
                 if hasattr(args[1], '__origin__') else _handle_type(args[1], defs)
             )
         }
-    elif origin in (list, tuple):
-        return {'type': 'array', 'items': _handle_type(args[0], defs)}
+    elif origin in (list, tuple, set):
+        schema = {'type': 'array', 'items': _handle_type(args[0], defs)}
+        if origin is set:
+            schema['uniqueItems'] = True
+        return schema
     return None
 
 # %% ../01_funccall.ipynb 21
@@ -92,11 +95,11 @@ def get_schema(f:callable, pname='input_schema')->dict:
     if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
     return {"name": f.__name__, "description": desc, pname: schema}
 
-# %% ../01_funccall.ipynb 36
+# %% ../01_funccall.ipynb 37
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_funccall.ipynb 37
+# %% ../01_funccall.ipynb 38
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -105,7 +108,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_funccall.ipynb 39
+# %% ../01_funccall.ipynb 40
 def _run(code:str ):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -128,7 +131,7 @@ def _run(code:str ):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_funccall.ipynb 44
+# %% ../01_funccall.ipynb 45
 def python(code, # Code to execute
            timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
