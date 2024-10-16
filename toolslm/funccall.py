@@ -76,7 +76,7 @@ def _get_nested_schema(obj):
     props, req, defs = {}, {}, {}
     
     for n, o in d.items():
-        if n != 'return':
+        if n != 'return' and n != 'self':
             _process_property(n, o, props, req, defs)
     
     schema = dict(type='object', properties=props, title=obj.__name__ if isinstance(obj, type) else None)
@@ -95,11 +95,11 @@ def get_schema(f:callable, pname='input_schema')->dict:
     if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
     return {"name": f.__name__, "description": desc, pname: schema}
 
-# %% ../01_funccall.ipynb 37
+# %% ../01_funccall.ipynb 39
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_funccall.ipynb 38
+# %% ../01_funccall.ipynb 40
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -108,7 +108,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_funccall.ipynb 40
+# %% ../01_funccall.ipynb 42
 def _run(code:str ):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -131,7 +131,7 @@ def _run(code:str ):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_funccall.ipynb 45
+# %% ../01_funccall.ipynb 47
 def python(code, # Code to execute
            timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
