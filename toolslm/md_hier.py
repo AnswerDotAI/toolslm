@@ -1,8 +1,9 @@
 import re
+from fastcore.utils import *
+__all__ = ['markdown_to_dict', 'create_heading_dict']
 
 def markdown_to_dict(markdown_content):
-    def clean_heading(text):
-        return re.sub(r'[^A-Za-z0-9 ]+', '', text).strip()
+    def clean_heading(text): return re.sub(r'[^A-Za-z0-9 ]+', '', text).strip()
 
     lines = markdown_content.splitlines()
     headings = []
@@ -23,18 +24,16 @@ def markdown_to_dict(markdown_content):
             if headings[j]['level'] <= h['level']:
                 end = headings[j]['line']
                 break
-        else:
-            end = len(lines)
+        else: end = len(lines)
         h['content'] = '\n'.join(lines[start:end]).strip()
 
     # Build the dictionary with hierarchical keys
-    result = {}
-    stack = []
+    result,stack = {},[]
     for h in headings:
         stack = stack[:h['level'] - 1] + [clean_heading(h['text'])]
         key = '.'.join(stack)
         result[key] = h['content']
-    return result
+    return dict2obj(result)
 
 def create_heading_dict(text):
     headings = re.findall(r'^#+.*', text, flags=re.MULTILINE)
@@ -52,7 +51,7 @@ def create_heading_dict(text):
         stack[-1][title] = new_dict
         stack.append(new_dict)
         prev_level = level
-    return result
+    return dict2obj(result)
 
 
 if __name__=='__main__':
