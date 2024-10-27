@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.0.8
+
+### New Features
+
+- Escape and print context in `folder2ctx` et al ([#16](https://github.com/AnswerDotAI/toolslm/issues/16))
+
+
 ## 0.0.7
 
 ### New Features
