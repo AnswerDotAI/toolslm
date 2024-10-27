@@ -58,8 +58,8 @@ def mk_doc(index:int,  # The document index
           ) -> tuple:
     "Create an `ft` format tuple for a single doc in Anthropic's recommended format"
     dt = mk_doctype(content, source)
-    content = Document_content(dt.content)
-    source = Source(dt.source)
+    content = Document_content(NotStr(dt.content))
+    source = Source(NotStr(dt.source))
     return Document(source, content, index=index, **kwargs)
 
 # %% ../00_xml.ipynb 19
@@ -101,4 +101,4 @@ def folder2ctx_cli(
     folder:str, # Folder name containing files to add to context
     **kwargs # Passed to `folder2ctx`
 )->str: # XML for Claude context
-    return folder2ctx(folder, **kwargs)
+    print(folder2ctx(folder, **kwargs))
