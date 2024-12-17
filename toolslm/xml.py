@@ -10,7 +10,7 @@ from collections import namedtuple
 from fastcore.utils import *
 from fastcore.meta import delegates
 from fastcore.xtras import hl_md
-from fastcore.xml import to_xml, Document, Documents, Document_content, Source
+from fastcore.xml import to_xml, Document, Documents, Document_content, Src
 from fastcore.script import call_parse
 try: from IPython import display
 except: display=None
@@ -32,7 +32,7 @@ def json_to_xml(d:dict, # JSON dictionary to convert
     return ET.tostring(root, encoding='unicode')
 
 # %% ../00_xml.ipynb 9
-doctype = namedtuple('doctype', ['source', 'content'])
+doctype = namedtuple('doctype', ['src', 'content'])
 
 # %% ../00_xml.ipynb 11
 def _add_nls(s):
@@ -42,40 +42,40 @@ def _add_nls(s):
     if s[-1]!='\n': s = s+'\n'
     return s
 
-# %% ../00_xml.ipynb 13
+# %% ../00_xml.ipynb 16
 def mk_doctype(content:str,  # The document content
-           source:Optional[str]=None # URL, filename, etc; defaults to `md5(content)` if not provided
+           src:Optional[str]=None # URL, filename, etc; defaults to `md5(content)` if not provided
           ) -> namedtuple:
     "Create a `doctype` named tuple"
-    if source is None: source = hashlib.md5(content.encode()).hexdigest()[:8]
-    return doctype(_add_nls(str(source).strip()), _add_nls(content.strip()))
+    if src is None: src = hashlib.md5(content.encode()).hexdigest()[:8]
+    return doctype(_add_nls(str(src).strip()), _add_nls(content.strip()))
 
-# %% ../00_xml.ipynb 16
+# %% ../00_xml.ipynb 19
 def mk_doc(index:int,  # The document index
            content:str,  # The document content
-           source:Optional[str]=None, # URL, filename, etc; defaults to `md5(content)` if not provided
+           src:Optional[str]=None, # URL, filename, etc; defaults to `md5(content)` if not provided
            **kwargs
           ) -> tuple:
     "Create an `ft` format tuple for a single doc in Anthropic's recommended format"
-    dt = mk_doctype(content, source)
+    dt = mk_doctype(content, src)
     content = Document_content(NotStr(dt.content))
-    source = Source(NotStr(dt.source))
-    return Document(source, content, index=index, **kwargs)
+    src = Src(NotStr(dt.src))
+    return Document(src, content, index=index, **kwargs)
 
-# %% ../00_xml.ipynb 19
+# %% ../00_xml.ipynb 22
 def docs_xml(docs:list[str],  # The content of each document
-             sources:Optional[list]=None,  # URLs, filenames, etc; each one defaults to `md5(content)` if not provided
+             srcs:Optional[list]=None,  # URLs, filenames, etc; each one defaults to `md5(content)` if not provided
              prefix:bool=True, # Include Anthropic's suggested prose intro?
              details:Optional[list]=None # Optional list of dicts with additional attrs for each doc
             )->str:
     "Create an XML string containing `docs` in Anthropic's recommended format"
     pre = 'Here are some documents for you to reference for your task:\n\n' if prefix else ''
-    if sources is None: sources = [None]*len(docs)
+    if srcs is None: srcs = [None]*len(docs)
     if details is None: details = [{}]*len(docs)
-    docs = (mk_doc(i+1, d, s, **kw) for i,(d,s,kw) in enumerate(zip(docs,sources,details)))
+    docs = (mk_doc(i+1, d, s, **kw) for i,(d,s,kw) in enumerate(zip(docs,srcs,details)))
     return pre + to_xml(Documents(docs))
 
-# %% ../00_xml.ipynb 26
+# %% ../00_xml.ipynb 29
 def files2ctx(
     fnames:list[Union[str,Path]], # List of file names to add to context
     prefix:bool=True # Include Anthropic's suggested prose intro?
@@ -84,7 +84,7 @@ def files2ctx(
     contents = [o.read_text() for o in fnames]
     return docs_xml(contents, fnames, prefix=prefix)
 
-# %% ../00_xml.ipynb 29
+# %% ../00_xml.ipynb 32
 @delegates(globtastic)
 def folder2ctx(
     folder:Union[str,Path], # Folder name containing files to add to context
@@ -94,7 +94,7 @@ def folder2ctx(
     fnames = globtastic(folder, **kwargs)
     return files2ctx(fnames, prefix=prefix)
 
-# %% ../00_xml.ipynb 31
+# %% ../00_xml.ipynb 34
 @call_parse
 @delegates(folder2ctx)
 def folder2ctx_cli(

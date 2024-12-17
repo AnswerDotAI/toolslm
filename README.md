@@ -16,96 +16,25 @@ pip install toolslm
 ### Context creation
 
 toolslm has some helpers to make it easier to generate XML context from
-files, for instance `folder2ctx`:
+files, for instance
+[`folder2ctx`](https://AnswerDotAI.github.io/toolslm/xml.html#folder2ctx):
 
 ``` python
 print(folder2ctx('samples', prefix=False, file_glob='*.py'))
 ```
 
-    <documents>
-    <document index="1">
-    <source>
+    <documents><document index="1"><src>
     samples/sample_core.py
-    </source>
-    <document_content>
+    </src><document-content>
     import inspect
     empty = inspect.Parameter.empty
     models = 'claude-3-opus-20240229','claude-3-sonnet-20240229','claude-3-haiku-20240307'
-    </document_content>
-    </document>
-    </documents>
+    </document-content></document></documents>
 
-### XML helpers
-
-Many language models work well with XML inputs, but XML can be a bit
-clunky to work with manually. Therefore, toolslm includes a couple of
-more streamlined approaches for XML generation.
-
-An XML node contains a tag, optional children, and optional attributes.
-`xt` creates a tuple of these three things, which we will use to general
-XML shortly. Attributes are passed as kwargs; since these might conflict
-with reserved words in Python, you can optionally add a `_` prefix and
-it’ll be stripped off.
-
-``` python
-xt('x-custom', ['hi'], _class='bar')
-```
-
-    ('x-custom', ['hi'], {'class': 'bar'})
-
-Claudette has functions defined for some common HTML elements to create
-`xt` tuples more easily, including these:
-
-``` python
-from toolslm.xml import div,img,h1,h2,p,hr,html
-```
-
-``` python
-a = html([
-    p('This is a paragraph'),
-    hr(),
-    img(src='http://example.prg'),
-    div([
-        h1('This is a header'),
-        h2('This is a sub-header', style='k:v'),
-    ], _class='foo')
-])
-a
-```
-
-    ('html',
-     [('p', 'This is a paragraph', {}),
-      ('hr', None, {}),
-      ('img', None, {'src': 'http://example.prg'}),
-      ('div',
-       [('h1', 'This is a header', {}),
-        ('h2', 'This is a sub-header', {'style': 'k:v'})],
-       {'class': 'foo'})],
-     {})
-
-To convert a tuple data structure created with `xt` and friends into
-XML, use `to_xml`, adding the `hl` parameter to optionally add syntax
-highlighting:
-
-``` python
-to_xml(a, hl=True)
-```
-
-``` xml
-<html>
-  <p>This is a paragraph</p>
-  <hr />
-  <img src="http://example.prg" />
-  <div class="foo">
-    <h1>This is a header</h1>
-    <h2 style="k:v">This is a sub-header</h2>
-  </div>
-</html>
-```
-
-JSON doesn’t map as nicely to XML as the `xt` data structure, but for
-simple XML trees it can be convenient. The `json_to_xml` function
-handles that conversion:
+JSON doesn’t map as nicely to XML as the `ft` data structure from
+`fastcore.xml`, but for simple XML trees it can be convenient. The
+[`json_to_xml`](https://AnswerDotAI.github.io/toolslm/xml.html#json_to_xml)
+function handles that conversion:
 
 ``` python
 a = dict(surname='Howard', firstnames=['Jeremy','Peter'],
@@ -124,6 +53,3 @@ print(json_to_xml(a, 'person'))
         <country>Australia</country>
       </address>
     </person>
-
-See the `xml source` section for a walkthru of XML and document context
-generation functionality.

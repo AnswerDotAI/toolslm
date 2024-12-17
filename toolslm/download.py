@@ -100,7 +100,7 @@ def find_docs(url):
     if parsed_url.path == '/' or not parsed_url.path: return None
     return find_docs(urljoin(url, '..'))
 
-# %% ../03_download.ipynb 23
+# %% ../03_download.ipynb 22
 def read_docs(url, optional=False, n_workers=None, rm_comments=True, rm_details=True):
     "If available, return LLM-friendly llms.txt context or markdown file response for `url`"
     url = find_docs(url)
