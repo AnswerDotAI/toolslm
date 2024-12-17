@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.0
+
+### Breaking changes
+
+- Replace `source` with `src` in context generation ([#17](https://github.com/AnswerDotAI/toolslm/issues/17))
+
+
 ## 0.0.8
 
 ### New Features
