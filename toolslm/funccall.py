@@ -112,11 +112,11 @@ def PathArg(
     path: str  # A filesystem path
 ): return Path(path)
 
-# %% ../01_funccall.ipynb 65
+# %% ../01_funccall.ipynb 66
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_funccall.ipynb 66
+# %% ../01_funccall.ipynb 67
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -125,7 +125,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_funccall.ipynb 68
+# %% ../01_funccall.ipynb 69
 def _run(code:str ):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -148,7 +148,7 @@ def _run(code:str ):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_funccall.ipynb 73
+# %% ../01_funccall.ipynb 74
 def python(code, # Code to execute
            timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
@@ -161,7 +161,7 @@ def python(code, # Code to execute
     except Exception as e: return traceback.format_exc()
     finally: signal.alarm(0)
 
-# %% ../01_funccall.ipynb 80
+# %% ../01_funccall.ipynb 81
 def mk_ns(*funcs_or_objs):
     merged = {}
     for o in funcs_or_objs:
@@ -170,7 +170,7 @@ def mk_ns(*funcs_or_objs):
         if callable(o) and hasattr(o, '__name__'): merged |= {o.__name__: o}
     return merged
 
-# %% ../01_funccall.ipynb 89
+# %% ../01_funccall.ipynb 90
 def call_func(fc_name, fc_inputs, ns):
     "Call the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     if not isinstance(ns, abc.Mapping): ns = mk_ns(*ns)
