@@ -96,6 +96,21 @@ def _process_property(name, obj, props, req, defs):
         # Non-container type or container without arguments
         p.update(_handle_type(obj.anno, defs))
 
+# %% ../01_funccall.ipynb 31
+def _get_nested_schema(obj):
+    "Generate nested JSON schema for a class or function"
+    d = docments(obj, full=True)
+    props, req, defs = {}, {}, {}
+
+    for n, o in d.items():
+        if n != 'return' and n != 'self':
+            _process_property(n, o, props, req, defs)
+
+    schema = dict(type='object', properties=props, title=obj.__name__ if isinstance(obj, type) else None)
+    if req: schema['required'] = list(req)
+    if defs: schema['$defs'] = defs
+    return schema
+
 # %% ../01_funccall.ipynb 35
 def get_schema(f:callable, pname='input_schema')->dict:
     "Generate JSON schema for a class, function, or method"
