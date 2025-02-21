@@ -29,8 +29,9 @@ def markdown_to_dict(markdown_content):
 
     # Build the dictionary with hierarchical keys
     result,stack = {},[]
+    first_level = headings[0]['level']
     for h in headings:
-        stack = stack[:h['level'] - 1] + [clean_heading(h['text'])]
+        stack = stack[:h['level'] - first_level] + [clean_heading(h['text'])]
         key = '.'.join(stack)
         result[key] = h['content']
     return dict2obj(result)
