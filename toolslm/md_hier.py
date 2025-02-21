@@ -127,7 +127,7 @@ Admin users management.
         assert result['Parent.Child'] == '## Child\nChild content.\n### Grandchild\nGrandchild content.'
         assert result['Parent.Child.Grandchild'] == '### Grandchild\nGrandchild content.'
 
-    def test_level2_siblings_levels():
+    def test_multiple_level2_siblings():
         md_content = "##Sib 1\n##Sib 2\n##Sib 3\n##Sib 4\n##Sib 5'"
         result = markdown_to_dict(md_content)
         assert 'Sib 1' in result
@@ -142,5 +142,5 @@ Admin users management.
     test_no_content()
     test_different_levels()
     test_parent_includes_subheadings()
-    test_level2_siblings_levels()
+    test_multiple_level2_siblings()
     print('tests passed')
