@@ -29,8 +29,9 @@ def markdown_to_dict(markdown_content):
 
     # Build the dictionary with hierarchical keys
     result,stack = {},[]
+    first_level = headings[0]['level']
     for h in headings:
-        stack = stack[:h['level'] - 1] + [clean_heading(h['text'])]
+        stack = stack[:h['level'] - first_level] + [clean_heading(h['text'])]
         key = '.'.join(stack)
         result[key] = h['content']
     return dict2obj(result)
@@ -126,11 +127,20 @@ Admin users management.
         assert result['Parent.Child'] == '## Child\nChild content.\n### Grandchild\nGrandchild content.'
         assert result['Parent.Child.Grandchild'] == '### Grandchild\nGrandchild content.'
 
+    def test_multiple_level2_siblings():
+        md_content = "##Sib 1\n##Sib 2\n##Sib 3\n##Sib 4\n##Sib 5'"
+        result = markdown_to_dict(md_content)
+        assert 'Sib 1' in result
+        assert 'Sib 2' in result
+        assert 'Sib 3' in result
+        assert 'Sib 4' in result
+        assert 'Sib 5' in result
+
     test_empty_content()
     test_special_characters()
     test_duplicate_headings()
     test_no_content()
     test_different_levels()
     test_parent_includes_subheadings()
+    test_multiple_level2_siblings()
     print('tests passed')
-
