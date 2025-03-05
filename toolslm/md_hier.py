@@ -7,9 +7,15 @@ def markdown_to_dict(markdown_content):
 
     lines = markdown_content.splitlines()
     headings = []
+    in_code_block = False
 
     # Parse headings with their levels and line numbers
     for idx, line in enumerate(lines):
+        # Toggle code block state when encountering fence
+        if line.strip().startswith('```'): in_code_block = not in_code_block
+        
+        # Only detect headings when not in a code block
+        if in_code_block: continue
         match = re.match(r'^(#{1,6})\s*(.*)', line)
         if match:
             level = len(match.group(1))
@@ -37,6 +43,7 @@ def markdown_to_dict(markdown_content):
     return dict2obj(result)
 
 def create_heading_dict(text):
+    text = re.sub(r'```[\s\S]*?```', '', text)
     headings = re.findall(r'^#+.*', text, flags=re.MULTILINE)
     result = {}
     stack = [result]
@@ -135,6 +142,12 @@ Admin users management.
         assert 'Sib 3' in result
         assert 'Sib 4' in result
         assert 'Sib 5' in result
+        
+    def test_code_chunks_escaped():
+        md_content = "# Parent\nParent content.\n## Child\nChild content.\n```python\n# Code comment\nprint('Hello, world!')\n```"
+        result = markdown_to_dict(md_content)
+        assert 'Code comment' not in result
+        assert "# Code comment" in result['Parent.Child']
 
     test_empty_content()
     test_special_characters()
@@ -143,4 +156,20 @@ Admin users management.
     test_different_levels()
     test_parent_includes_subheadings()
     test_multiple_level2_siblings()
+    test_code_chunks_escaped()
+    print('tests passed')
+
+    def test_nested_headings():    
+        md_content = "# Parent\nParent content.\n## Child\nChild content.\n### Grandchild\nGrandchild content."
+        result = create_heading_dict(md_content)
+        assert 'Child' in result['Parent']
+        assert 'Grandchild' in result['Parent']['Child']
+
+    def test_code_chunks_escaped():
+        md_content = "# Parent\nParent content.\n## Child\nChild content.\n```python\n# Code comment\nprint('Hello, world!')\n```"
+        result = create_heading_dict(md_content)
+        assert 'Code comment' not in result
+    
+    test_nested_headings()
+    test_code_chunks_escaped()
     print('tests passed')
