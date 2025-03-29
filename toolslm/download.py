@@ -27,10 +27,10 @@ def read_md(url, rm_comments=True, rm_details=True, **kwargs):
     return clean_md(get(url, **kwargs).text, rm_comments=rm_comments, rm_details=rm_details)
 
 # %% ../03_download.ipynb 7
-def html2md(s:str):
+def html2md(s:str, ignore_links=True):
     "Convert `s` from HTML to markdown"
     o = HTML2Text(bodywidth=5000)
-    o.ignore_links = True
+    o.ignore_links = ignore_links
     o.mark_code = True
     o.ignore_images = True
     return o.handle(s)
@@ -42,6 +42,7 @@ def read_html(url, # URL to read
               rm_details=True, # Removes `<details>` tags
               multi=False, # Get all matches to `sel` or first one  
               wrap_tag=None, #If multi, each selection wrapped with <wrap_tag>content</wrap_tag>
+              ignore_links=True,
              ): # Cleaned markdown
     "Get `url`, optionally selecting CSS selector `sel`, and convert to clean markdown"
     page = get(url).text
@@ -51,12 +52,12 @@ def read_html(url, # URL to read
             page = [str(el) for el in soup.select(sel)]
             if not wrap_tag: page = "\n".join(page)
         else: page = str(soup.select_one(sel))
-    mds = map(lambda x: clean_md(html2md(x), rm_comments, rm_details=rm_details), tuplify(page))
+    mds = map(lambda x: clean_md(html2md(x, ignore_links=ignore_links), rm_comments, rm_details=rm_details), tuplify(page))
     if wrap_tag: return '\n'.join([f"\n<{wrap_tag}>\n{o}</{wrap_tag}>\n" for o in mds])
     else: return'\n'.join(mds)
 
 
-# %% ../03_download.ipynb 12
+# %% ../03_download.ipynb 13
 def get_llmstxt(url, optional=False, n_workers=None):
     "Get llms.txt file from and expand it with `llms_txt.create_ctx()`"
     if not url.endswith('llms.txt'): return None
@@ -64,7 +65,7 @@ def get_llmstxt(url, optional=False, n_workers=None):
     if resp.status_code!=200: return None
     return create_ctx(resp.text, optional=optional, n_workers=n_workers)
 
-# %% ../03_download.ipynb 14
+# %% ../03_download.ipynb 15
 def split_url(url):
     "Split `url` into base, path, and file name, normalising name to '/' if empty"
     parsed = urlparse(url.strip('/'))
@@ -74,13 +75,13 @@ def split_url(url):
     if not path and not fname: path='/'
     return base,path,fname
 
-# %% ../03_download.ipynb 16
+# %% ../03_download.ipynb 17
 def _tryget(url):
     "Return response from `url` if `status_code!=404`, otherwise `None`"
     res = get(url)
     return None if res.status_code==404 else url
 
-# %% ../03_download.ipynb 17
+# %% ../03_download.ipynb 18
 def find_docs(url):
     "If available, return LLM-friendly llms.txt context or markdown file location from `url`"
     base,path,fname = split_url(url)
@@ -100,7 +101,7 @@ def find_docs(url):
     if parsed_url.path == '/' or not parsed_url.path: return None
     return find_docs(urljoin(url, '..'))
 
-# %% ../03_download.ipynb 22
+# %% ../03_download.ipynb 23
 def read_docs(url, optional=False, n_workers=None, rm_comments=True, rm_details=True):
     "If available, return LLM-friendly llms.txt context or markdown file response for `url`"
     url = find_docs(url)
