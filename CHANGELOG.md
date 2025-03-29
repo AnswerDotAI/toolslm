@@ -4,6 +4,18 @@
 
 ## 0.1.0
 
+### New Features
+
+- Add arg ignore links ([#26](https://github.com/AnswerDotAI/toolslm/pull/26)), thanks to [@Isaac-Flath](https://github.com/Isaac-Flath)
+
+### Bugs Squashed
+
+- fix: prevent markdown heading detection inside code blocks ([#25](https://github.com/AnswerDotAI/toolslm/pull/25)), thanks to [@franckalbinet](https://github.com/franckalbinet)
+- Fix markdown hierarchy parsing for arbitrary header levels ([#22](https://github.com/AnswerDotAI/toolslm/pull/22)), thanks to [@erikgaas](https://github.com/erikgaas)
+
+
+## 0.1.0
+
 ### Breaking changes
 
 - Replace `source` with `src` in context generation ([#17](https://github.com/AnswerDotAI/toolslm/issues/17))
