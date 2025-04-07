@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.1.2
+
+### New Features
+
+- Adds `call_func_async` ([#27](https://github.com/AnswerDotAI/toolslm/pull/27)), thanks to [@mikonapoli](https://github.com/mikonapoli)
+- Add arg ignore links ([#26](https://github.com/AnswerDotAI/toolslm/pull/26)), thanks to [@Isaac-Flath](https://github.com/Isaac-Flath)
+
+
 ## 0.1.1
 
 ### New Features
