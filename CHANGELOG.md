@@ -2,6 +2,12 @@
 
 <!-- do not remove -->
 
+## 0.1.3
+
+### New Features
+
+- Pass glb,loc to python ([#28](https://github.com/AnswerDotAI/toolslm/issues/28))
+
 ## 0.1.2
 
 ### New Features
