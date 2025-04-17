@@ -141,7 +141,7 @@ def _copy_loc(new, orig):
     return new
 
 # %% ../01_funccall.ipynb 69
-def _run(code:str ):
+def _run(code:str, glb:dict=None, loc:dict=None):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
     last_node = tree.body[-1] if tree.body else None
@@ -153,30 +153,34 @@ def _run(code:str ):
         tree.body[-1] = _copy_loc(assign_node, last_node)
 
     compiled_code = compile(tree, filename='<ast>', mode='exec')
-    namespace = {}
+    glb = glb or {}
     stdout_buffer = io.StringIO()
     saved_stdout = sys.stdout
     sys.stdout = stdout_buffer
-    try: exec(compiled_code, namespace)
+    try: exec(compiled_code, glb, loc)
     finally: sys.stdout = saved_stdout
-    _result = namespace.get('_result', None)
+    _result = glb.get('_result', None)
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
 # %% ../01_funccall.ipynb 74
-def python(code, # Code to execute
-           timeout=5 # Maximum run time in seconds before a `TimeoutError` is raised
+def python(code:str, # Code to execute
+           glb:Optional[dict]=None, # Globals namespace
+           loc:Optional[dict]=None, # Locals namespace
+           timeout:int=3600 # Maximum run time in seconds before a `TimeoutError` is raised
           ): # Result of last node, if it's an expression, or `None` otherwise
     """Executes python `code` with `timeout` and returning final expression (similar to IPython).
     Raised exceptions are returned as a string, with a stack trace."""
     def handler(*args): raise TimeoutError()
+    if glb is None: glb = inspect.currentframe().f_back.f_globals
+    if loc is None: loc=glb
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(timeout)
-    try: return _run(code)
+    try: return _run(code, glb, loc)
     except Exception as e: return traceback.format_exc()
     finally: signal.alarm(0)
 
-# %% ../01_funccall.ipynb 81
+# %% ../01_funccall.ipynb 85
 def mk_ns(*funcs_or_objs):
     merged = {}
     for o in funcs_or_objs:
@@ -185,14 +189,14 @@ def mk_ns(*funcs_or_objs):
         if callable(o) and hasattr(o, '__name__'): merged |= {o.__name__: o}
     return merged
 
-# %% ../01_funccall.ipynb 90
+# %% ../01_funccall.ipynb 94
 def call_func(fc_name, fc_inputs, ns):
     "Call the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     if not isinstance(ns, abc.Mapping): ns = mk_ns(*ns)
     func = ns[fc_name]
     return func(**fc_inputs)
 
-# %% ../01_funccall.ipynb 97
+# %% ../01_funccall.ipynb 101
 async def call_func_async(fc_name, fc_inputs, ns):
     "Awaits the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     if not isinstance(ns, abc.Mapping): ns = mk_ns(*ns)
