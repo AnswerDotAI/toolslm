@@ -7,10 +7,6 @@ __all__ = ['clean_md', 'read_md', 'html2md', 'read_html', 'get_llmstxt', 'split_
 from fastcore.utils import *
 from httpx import get
 from fastcore.meta import delegates
-from llms_txt import *
-
-from html2text import HTML2Text
-from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
 # %% ../03_download.ipynb 4
@@ -29,7 +25,8 @@ def read_md(url, rm_comments=True, rm_details=True, **kwargs):
 # %% ../03_download.ipynb 7
 def html2md(s:str, ignore_links=True):
     "Convert `s` from HTML to markdown"
-    o = HTML2Text(bodywidth=5000)
+    import html2text
+    o = html2text.HTML2Text(bodywidth=5000)
     o.ignore_links = ignore_links
     o.mark_code = True
     o.ignore_images = True
@@ -47,6 +44,7 @@ def read_html(url, # URL to read
     "Get `url`, optionally selecting CSS selector `sel`, and convert to clean markdown"
     page = get(url).text
     if sel:
+        from bs4 import BeautifulSoup
         soup = BeautifulSoup(page, 'html.parser')
         if multi:
             page = [str(el) for el in soup.select(sel)]
@@ -56,14 +54,14 @@ def read_html(url, # URL to read
     if wrap_tag: return '\n'.join([f"\n<{wrap_tag}>\n{o}</{wrap_tag}>\n" for o in mds])
     else: return'\n'.join(mds)
 
-
 # %% ../03_download.ipynb 13
 def get_llmstxt(url, optional=False, n_workers=None):
     "Get llms.txt file from and expand it with `llms_txt.create_ctx()`"
     if not url.endswith('llms.txt'): return None
+    import llms_txt
     resp = get(url)
     if resp.status_code!=200: return None
-    return create_ctx(resp.text, optional=optional, n_workers=n_workers)
+    return llms_txt.create_ctx(resp.text, optional=optional, n_workers=n_workers)
 
 # %% ../03_download.ipynb 15
 def split_url(url):
