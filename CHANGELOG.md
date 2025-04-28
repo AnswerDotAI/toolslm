@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.2.0
+
+### Breaking changes
+
+- Optional libs (http2text, beautifulsoup, llms_txt) are no longer automatically installed
+
+### New Features
+
+- Lazily load optional modules ([#29](https://github.com/AnswerDotAI/toolslm/issues/29))
+
+
 ## 0.1.3
 
 ### New Features
