@@ -112,8 +112,9 @@ def _get_nested_schema(obj):
     return schema
 
 # %% ../01_funccall.ipynb 35
-def get_schema(f:callable, pname='input_schema')->dict:
+def get_schema(f:Union[callable,dict], pname='input_schema')->dict:
     "Generate JSON schema for a class, function, or method"
+    if isinstance(f, dict): return f
     schema = _get_nested_schema(f)
     desc = f.__doc__
     assert desc, "Docstring missing!"
@@ -201,4 +202,6 @@ async def call_func_async(fc_name, fc_inputs, ns):
     "Awaits the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     if not isinstance(ns, abc.Mapping): ns = mk_ns(*ns)
     func = ns[fc_name]
-    return await func(**fc_inputs)
+    res = func(**fc_inputs)
+    if inspect.iscoroutine(res): res = await res
+    return res
