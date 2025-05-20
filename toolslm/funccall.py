@@ -198,28 +198,9 @@ def call_func(fc_name, fc_inputs, ns, raise_on_err=True):
     try: return func(**fc_inputs)
     except Exception as e:
         if raise_on_err: raise e
-        else: return str(e)
+        else: return traceback.format_exc()
 
-# %% ../01_funccall.ipynb 104
-# async def call_func_async(fc_name, fc_inputs, ns, raise_on_err=True):
-#     "Awaits the function `fc_name` with the given `fc_inputs` using namespace `ns`."
-#     if not isinstance(ns, abc.Mapping): ns = mk_ns(*ns)
-#     func = ns[fc_name]
-#     res = func(**fc_inputs)
-#     if inspect.iscoroutine(res): res = await res
-#     return res
-
-
-# def call_func(fc_name, fc_inputs, ns, raise_on_err=True):
-#     "Call the function `fc_name` with the given `fc_inputs` using namespace `ns`."
-#     if not isinstance(ns, abc.Mapping): ns = mk_ns(*ns)
-#     func = ns[fc_name]
-#     try: return func(**fc_inputs)
-#     except Exception as e:
-#         if raise_on_err: raise e
-#         else: return str(e)
-
-
+# %% ../01_funccall.ipynb 106
 async def call_func_async(fc_name, fc_inputs, ns, raise_on_err=True):
     "Awaits the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     res = call_func(fc_name, fc_inputs, ns, raise_on_err=raise_on_err)
@@ -227,5 +208,5 @@ async def call_func_async(fc_name, fc_inputs, ns, raise_on_err=True):
         try: res = await res
         except Exception as e:
             if raise_on_err: raise e
-            else: return str(e)
+            else: return traceback.format_exc()
     return res
