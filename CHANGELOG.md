@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.2.1
+
+### New Features
+
+- Optionally dont raise error on `call_func` ([#31](https://github.com/AnswerDotAI/toolslm/pull/31)), thanks to [@erikgaas](https://github.com/erikgaas)
+- dict support in `get_schema` ([#30](https://github.com/AnswerDotAI/toolslm/issues/30))
+
+
 ## 0.2.0
 
 ### Breaking changes
