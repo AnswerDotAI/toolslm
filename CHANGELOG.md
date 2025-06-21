@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.2.2
+
+### New Features
+
+- Auto clean up bad param names in `call_func` ([#33](https://github.com/AnswerDotAI/toolslm/issues/33))
+
+### Bugs Squashed
+
+- python() function can't be used as a tool ([#32](https://github.com/AnswerDotAI/toolslm/issues/32))
+
+
 ## 0.2.1
 
 ### New Features
