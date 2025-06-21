@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['empty', 'custom_types', 'get_schema', 'PathArg', 'python', 'mk_ns', 'call_func', 'call_func_async']
 
-# %% ../01_funccall.ipynb 2
+# %% ../01_funccall.ipynb
 import inspect
 from collections import abc
 from fastcore.utils import *
@@ -11,10 +11,10 @@ from fastcore.docments import docments
 from typing import get_origin, get_args, Dict, List, Optional, Tuple, Union
 from types import UnionType
 
-# %% ../01_funccall.ipynb 4
+# %% ../01_funccall.ipynb
 empty = inspect.Parameter.empty
 
-# %% ../01_funccall.ipynb 12
+# %% ../01_funccall.ipynb
 def _types(t:type)->tuple[str,Optional[str]]:
     "Tuple of json schema type name and (if appropriate) array item name."
     if t is empty: raise TypeError('Missing type')
@@ -31,7 +31,7 @@ def _types(t:type)->tuple[str,Optional[str]]:
     # if t is the type itself like int, use the __name__ representation as the key
     else: return tmap.get(t.__name__, "object"), None
 
-# %% ../01_funccall.ipynb 19
+# %% ../01_funccall.ipynb
 def _param(name, info):
     "json schema parameter given `name` and `info` from docments full dict."
     paramt,itemt = _types(info.anno)
@@ -40,19 +40,20 @@ def _param(name, info):
     if info.default is not empty: pschema["default"] = info.default
     return pschema
 
-# %% ../01_funccall.ipynb 22
+# %% ../01_funccall.ipynb
 custom_types = {Path}
 
 def _handle_type(t, defs):
     "Handle a single type, creating nested schemas if necessary"
     if t is NoneType: return {'type': 'null'}
     if t in custom_types: return {'type':'string', 'format':t.__name__}
+    if t in (dict, list, tuple, set): return {'type': _types(t)[0]}
     if isinstance(t, type) and not issubclass(t, (int, float, str, bool)) or inspect.isfunction(t):
         defs[t.__name__] = _get_nested_schema(t)
         return {'$ref': f'#/$defs/{t.__name__}'}
     return {'type': _types(t)[0]}
 
-# %% ../01_funccall.ipynb 24
+# %% ../01_funccall.ipynb
 def _is_container(t):
     "Check if type is a container (list, dict, tuple, set, Union)"
     origin = get_origin(t)
@@ -62,7 +63,7 @@ def _is_parameterized(t):
     "Check if type has arguments (e.g. list[int] vs list, dict[str, int] vs dict)"
     return _is_container(t) and (get_args(t) != ())
 
-# %% ../01_funccall.ipynb 30
+# %% ../01_funccall.ipynb
 def _handle_container(origin, args, defs):
     "Handle container types like dict, list, tuple, set, and Union"
     if origin is Union or origin is UnionType:
@@ -83,7 +84,7 @@ def _handle_container(origin, args, defs):
         return schema
     return None
 
-# %% ../01_funccall.ipynb 31
+# %% ../01_funccall.ipynb
 def _process_property(name, obj, props, req, defs):
     "Process a single property of the schema"
     p = _param(name, obj)
@@ -91,12 +92,12 @@ def _process_property(name, obj, props, req, defs):
     if obj.default is empty: req[name] = True
 
     if _is_container(obj.anno) and _is_parameterized(obj.anno):
-            p.update(_handle_container(get_origin(obj.anno), get_args(obj.anno), defs))        
+        p.update(_handle_container(get_origin(obj.anno), get_args(obj.anno), defs))        
     else:
         # Non-container type or container without arguments
         p.update(_handle_type(obj.anno, defs))
 
-# %% ../01_funccall.ipynb 32
+# %% ../01_funccall.ipynb
 def _get_nested_schema(obj):
     "Generate nested JSON schema for a class or function"
     d = docments(obj, full=True)
@@ -111,7 +112,7 @@ def _get_nested_schema(obj):
     if defs: schema['$defs'] = defs
     return schema
 
-# %% ../01_funccall.ipynb 36
+# %% ../01_funccall.ipynb
 def get_schema(f:Union[callable,dict], pname='input_schema')->dict:
     "Generate JSON schema for a class, function, or method"
     if isinstance(f, dict): return f
@@ -123,16 +124,16 @@ def get_schema(f:Union[callable,dict], pname='input_schema')->dict:
     if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
     return {"name": f.__name__, "description": desc, pname: schema}
 
-# %% ../01_funccall.ipynb 47
+# %% ../01_funccall.ipynb
 def PathArg(
     path: str  # A filesystem path
 ): return Path(path)
 
-# %% ../01_funccall.ipynb 67
+# %% ../01_funccall.ipynb
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../01_funccall.ipynb 68
+# %% ../01_funccall.ipynb
 def _copy_loc(new, orig):
     "Copy location information from original node to new node and all children."
     new = ast.copy_location(new, orig)
@@ -141,7 +142,7 @@ def _copy_loc(new, orig):
         elif isinstance(o, list): setattr(new, field, [_copy_loc(value, orig) for value in o])
     return new
 
-# %% ../01_funccall.ipynb 70
+# %% ../01_funccall.ipynb
 def _run(code:str, glb:dict=None, loc:dict=None):
     "Run `code`, returning final expression (similar to IPython)"
     tree = ast.parse(code)
@@ -164,14 +165,14 @@ def _run(code:str, glb:dict=None, loc:dict=None):
     if _result is not None: return _result
     return stdout_buffer.getvalue().strip()
 
-# %% ../01_funccall.ipynb 75
-def python(code:str, # Code to execute
-           glb:Optional[dict]=None, # Globals namespace
-           loc:Optional[dict]=None, # Locals namespace
-           timeout:int=3600 # Maximum run time in seconds before a `TimeoutError` is raised
-          ): # Result of last node, if it's an expression, or `None` otherwise
-    """Executes python `code` with `timeout` and returning final expression (similar to IPython).
-    Raised exceptions are returned as a string, with a stack trace."""
+# %% ../01_funccall.ipynb
+def python(
+    code:str, # Code to execute
+    glb:Optional[dict]=None, # Globals namespace
+    loc:Optional[dict]=None, # Locals namespace
+    timeout:int=3600 # Maximum run time in seconds
+):
+    "Executes python `code` with `timeout` and returning final expression (similar to IPython)."
     def handler(*args): raise TimeoutError()
     if glb is None: glb = inspect.currentframe().f_back.f_globals
     if loc is None: loc=glb
@@ -181,7 +182,7 @@ def python(code:str, # Code to execute
     except Exception as e: return traceback.format_exc()
     finally: signal.alarm(0)
 
-# %% ../01_funccall.ipynb 86
+# %% ../01_funccall.ipynb
 def mk_ns(*funcs_or_objs):
     merged = {}
     for o in funcs_or_objs:
@@ -190,7 +191,7 @@ def mk_ns(*funcs_or_objs):
         if callable(o) and hasattr(o, '__name__'): merged |= {o.__name__: o}
     return merged
 
-# %% ../01_funccall.ipynb 95
+# %% ../01_funccall.ipynb
 def call_func(fc_name, fc_inputs, ns, raise_on_err=True):
     "Call the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     if not isinstance(ns, abc.Mapping): ns = mk_ns(*ns)
@@ -202,7 +203,7 @@ def call_func(fc_name, fc_inputs, ns, raise_on_err=True):
         if raise_on_err: raise e from None
         else: return traceback.format_exc()
 
-# %% ../01_funccall.ipynb 104
+# %% ../01_funccall.ipynb
 async def call_func_async(fc_name, fc_inputs, ns, raise_on_err=True):
     "Awaits the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     res = call_func(fc_name, fc_inputs, ns, raise_on_err=raise_on_err)

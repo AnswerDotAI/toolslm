@@ -3,18 +3,18 @@
 # %% auto 0
 __all__ = ['get_shell']
 
-# %% ../02_shell.ipynb 2
+# %% ../02_shell.ipynb
 import ast, time, signal, traceback
 from fastcore.utils import *
 
-# %% ../02_shell.ipynb 4
+# %% ../02_shell.ipynb
 from IPython.terminal.interactiveshell import TerminalInteractiveShell
 from IPython.utils.capture import capture_output
 
-# %% ../02_shell.ipynb 7
+# %% ../02_shell.ipynb
 TerminalInteractiveShell.orig_run = TerminalInteractiveShell.run_cell
 
-# %% ../02_shell.ipynb 8
+# %% ../02_shell.ipynb
 @patch
 def run_cell(self:TerminalInteractiveShell, cell, timeout=None):
     "Wrapper for original `run_cell` which adds timeout and output capture"
@@ -31,7 +31,7 @@ def run_cell(self:TerminalInteractiveShell, cell, timeout=None):
     finally:
         if timeout: signal.alarm(0)
 
-# %% ../02_shell.ipynb 9
+# %% ../02_shell.ipynb
 def get_shell()->TerminalInteractiveShell:
     "Get a `TerminalInteractiveShell` with minimal functionality"
     sh = TerminalInteractiveShell()

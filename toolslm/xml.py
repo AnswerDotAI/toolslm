@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['doctype', 'json_to_xml', 'mk_doctype', 'mk_doc', 'docs_xml', 'files2ctx', 'folder2ctx', 'folder2ctx_cli']
 
-# %% ../00_xml.ipynb 3
+# %% ../00_xml.ipynb
 import hashlib,xml.etree.ElementTree as ET
 from collections import namedtuple
 
@@ -15,7 +15,7 @@ from fastcore.script import call_parse
 try: from IPython import display
 except: display=None
 
-# %% ../00_xml.ipynb 4
+# %% ../00_xml.ipynb
 def json_to_xml(d:dict, # JSON dictionary to convert
                 rnm:str # Root name
                )->str:
@@ -31,10 +31,10 @@ def json_to_xml(d:dict, # JSON dictionary to convert
     ET.indent(root)
     return ET.tostring(root, encoding='unicode')
 
-# %% ../00_xml.ipynb 9
+# %% ../00_xml.ipynb
 doctype = namedtuple('doctype', ['src', 'content'])
 
-# %% ../00_xml.ipynb 11
+# %% ../00_xml.ipynb
 def _add_nls(s):
     "Add newlines to start and end of `s` if missing"
     if not s: return s
@@ -42,7 +42,7 @@ def _add_nls(s):
     if s[-1]!='\n': s = s+'\n'
     return s
 
-# %% ../00_xml.ipynb 16
+# %% ../00_xml.ipynb
 def mk_doctype(content:str,  # The document content
            src:Optional[str]=None # URL, filename, etc; defaults to `md5(content)` if not provided
           ) -> namedtuple:
@@ -50,7 +50,7 @@ def mk_doctype(content:str,  # The document content
     if src is None: src = hashlib.md5(content.encode()).hexdigest()[:8]
     return doctype(_add_nls(str(src).strip()), _add_nls(content.strip()))
 
-# %% ../00_xml.ipynb 19
+# %% ../00_xml.ipynb
 def mk_doc(index:int,  # The document index
            content:str,  # The document content
            src:Optional[str]=None, # URL, filename, etc; defaults to `md5(content)` if not provided
@@ -62,7 +62,7 @@ def mk_doc(index:int,  # The document index
     src = Src(NotStr(dt.src))
     return Document(src, content, index=index, **kwargs)
 
-# %% ../00_xml.ipynb 22
+# %% ../00_xml.ipynb
 def docs_xml(docs:list[str],  # The content of each document
              srcs:Optional[list]=None,  # URLs, filenames, etc; each one defaults to `md5(content)` if not provided
              prefix:bool=True, # Include Anthropic's suggested prose intro?
@@ -75,7 +75,7 @@ def docs_xml(docs:list[str],  # The content of each document
     docs = (mk_doc(i+1, d, s, **kw) for i,(d,s,kw) in enumerate(zip(docs,srcs,details)))
     return pre + to_xml(Documents(docs))
 
-# %% ../00_xml.ipynb 29
+# %% ../00_xml.ipynb
 def files2ctx(
     fnames:list[Union[str,Path]], # List of file names to add to context
     prefix:bool=True # Include Anthropic's suggested prose intro?
@@ -84,7 +84,7 @@ def files2ctx(
     contents = [o.read_text() for o in fnames]
     return docs_xml(contents, fnames, prefix=prefix)
 
-# %% ../00_xml.ipynb 32
+# %% ../00_xml.ipynb
 @delegates(globtastic)
 def folder2ctx(
     folder:Union[str,Path], # Folder name containing files to add to context
@@ -94,7 +94,7 @@ def folder2ctx(
     fnames = globtastic(folder, **kwargs)
     return files2ctx(fnames, prefix=prefix)
 
-# %% ../00_xml.ipynb 34
+# %% ../00_xml.ipynb
 @call_parse
 @delegates(folder2ctx)
 def folder2ctx_cli(
