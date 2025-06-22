@@ -183,12 +183,14 @@ def python(
     finally: signal.alarm(0)
 
 # %% ../01_funccall.ipynb
-def mk_ns(*funcs_or_objs):
+def mk_ns(fs):
     merged = {}
-    for o in funcs_or_objs:
-        if isinstance(o, type): merged |= {n:getattr(o,n) for n,m in o.__dict__.items() if isinstance(m, (staticmethod, classmethod))}
-        if isinstance(o, object): merged |= {n:getattr(o,n) for n, m in inspect.getmembers(o, inspect.ismethod)} | {n:m for n,m in o.__class__.__dict__.items() if isinstance(m, staticmethod)}
-        if callable(o) and hasattr(o, '__name__'): merged |= {o.__name__: o}
+    fs = [fs] if isinstance(fs,dict) else listify(fs)
+    for o in fs:
+        if isinstance(o, dict): merged |= o
+        elif isinstance(o, type): merged |= {n:getattr(o,n) for n,m in o.__dict__.items() if isinstance(m, (staticmethod, classmethod))}
+        elif callable(o) and hasattr(o, '__name__'): merged |= {o.__name__: o}
+        merged |= {n:getattr(o,n) for n, m in inspect.getmembers(o, inspect.ismethod)} | {n:m for n,m in o.__class__.__dict__.items() if isinstance(m, staticmethod)}
     return merged
 
 # %% ../01_funccall.ipynb
