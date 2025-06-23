@@ -184,9 +184,9 @@ def python(
 
 # %% ../01_funccall.ipynb
 def mk_ns(fs):
+    if isinstance(fs, abc.Mapping): return fs
     merged = {}
-    fs = [fs] if isinstance(fs,dict) else listify(fs)
-    for o in fs:
+    for o in listify(fs):
         if isinstance(o, dict): merged |= o
         elif isinstance(o, type): merged |= {n:getattr(o,n) for n,m in o.__dict__.items() if isinstance(m, (staticmethod, classmethod))}
         elif callable(o) and hasattr(o, '__name__'): merged |= {o.__name__: o}
@@ -196,7 +196,7 @@ def mk_ns(fs):
 # %% ../01_funccall.ipynb
 def call_func(fc_name, fc_inputs, ns, raise_on_err=True):
     "Call the function `fc_name` with the given `fc_inputs` using namespace `ns`."
-    if not isinstance(ns, abc.Mapping): ns = mk_ns(*ns)
+    if not isinstance(ns, abc.Mapping): ns = mk_ns(ns)
     func = ns[fc_name]
     # Clean up bad param names
     inps = {re.sub(r'\W', '', k):v for k,v in fc_inputs.items()}
