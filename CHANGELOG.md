@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.2.3
+
+### New Features
+
+- Handle list and dict args to `mk_ns` ([#34](https://github.com/AnswerDotAI/toolslm/issues/34))
+
+
 ## 0.2.2
 
 ### New Features
