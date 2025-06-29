@@ -188,9 +188,7 @@ def mk_ns(fs):
     merged = {}
     for o in listify(fs):
         if isinstance(o, dict): merged |= o
-        elif isinstance(o, type): merged |= {n:getattr(o,n) for n,m in o.__dict__.items() if isinstance(m, (staticmethod, classmethod))}
         elif callable(o) and hasattr(o, '__name__'): merged |= {o.__name__: o}
-        merged |= {n:getattr(o,n) for n, m in inspect.getmembers(o, inspect.ismethod)} | {n:m for n,m in o.__class__.__dict__.items() if isinstance(m, staticmethod)}
     return merged
 
 # %% ../01_funccall.ipynb
