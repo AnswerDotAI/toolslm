@@ -4,7 +4,9 @@
 
 ## 0.3.0
 
+### Breaking changes
 
+- Remove object enumeration of tools ([#35](https://github.com/AnswerDotAI/toolslm/issues/35))
 
 
 ## 0.2.3
