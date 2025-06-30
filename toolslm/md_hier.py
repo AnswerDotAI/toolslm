@@ -6,7 +6,7 @@ def markdown_to_dict(
     markdown_content:str  # Markdown text including headings
 )->AttrDict: # Dictionary with dot-separated hierarchical keys and content values
     "Parse markdown content into a hierarchical dictionary with dot-separated keys."
-    def clean_heading(text): return re.sub(r'[^A-Za-z0-9 ]+', '', text).strip()
+    def clean_heading(text): return re.sub(r'[.]+', '', text).strip()  # Only remove dots (key separator)
 
     lines = markdown_content.splitlines()
     headings = []
@@ -37,6 +37,9 @@ def markdown_to_dict(
 
     # Build the dictionary with hierarchical keys
     result,stack = {},[]
+    if not headings:
+        return dict2obj(result)
+
     first_level = headings[0]['level']
     for h in headings:
         stack = stack[:h['level'] - first_level] + [clean_heading(h['text'])]
@@ -44,26 +47,28 @@ def markdown_to_dict(
         result[key] = h['content']
     return dict2obj(result)
 
-def create_heading_dict(
-    text:str  # The markdown text to parse
-)->AttrDict: # Nested dictionary structure representing the heading hierarchy
+def create_heading_dict(text):
     "Create a nested dictionary structure from markdown headings."
     text = re.sub(r'```[\s\S]*?```', '', text)
     headings = re.findall(r'^#+.*', text, flags=re.MULTILINE)
     result = {}
     stack = [result]
-    prev_level = 0
+    stack_levels = [0]  # Track the level at each stack position
 
     for heading in headings:
         level = heading.count('#')
         title = heading.strip('#').strip()
-        while level <= prev_level:
+
+        # Pop stack until we find the right parent level
+        while len(stack) > 1 and stack_levels[-1] >= level:
             stack.pop()
-            prev_level -= 1
+            stack_levels.pop()
+
         new_dict = {}
         stack[-1][title] = new_dict
         stack.append(new_dict)
-        prev_level = level
+        stack_levels.append(level)
+
     return dict2obj(result)
 
 
@@ -107,8 +112,8 @@ Admin users management.
     def test_special_characters():
         md_content = "# Heading *With* Special _Characters_!\nContent under heading."
         result = markdown_to_dict(md_content)
-        assert 'Heading With Special Characters' in result
-        assert result['Heading With Special Characters'] == '# Heading *With* Special _Characters_!\nContent under heading.'
+        assert 'Heading *With* Special _Characters_!' in result
+        assert result['Heading *With* Special _Characters_!'] == '# Heading *With* Special _Characters_!\nContent under heading.'
 
     def test_duplicate_headings():
         md_content = "# Duplicate\n## Duplicate\n### Duplicate\nContent under duplicate headings."
@@ -146,8 +151,8 @@ Admin users management.
         assert 'Sib 2' in result
         assert 'Sib 3' in result
         assert 'Sib 4' in result
-        assert 'Sib 5' in result
-        
+        assert "Sib 5'" in result  # Note the apostrophe is preserved
+
     def test_code_chunks_escaped():
         md_content = "# Parent\nParent content.\n## Child\nChild content.\n```python\n# Code comment\nprint('Hello, world!')\n```"
         result = markdown_to_dict(md_content)
@@ -164,7 +169,7 @@ Admin users management.
     test_code_chunks_escaped()
     print('tests passed')
 
-    def test_nested_headings():    
+    def test_nested_headings():
         md_content = "# Parent\nParent content.\n## Child\nChild content.\n### Grandchild\nGrandchild content."
         result = create_heading_dict(md_content)
         assert 'Child' in result['Parent']
@@ -174,7 +179,94 @@ Admin users management.
         md_content = "# Parent\nParent content.\n## Child\nChild content.\n```python\n# Code comment\nprint('Hello, world!')\n```"
         result = create_heading_dict(md_content)
         assert 'Code comment' not in result
-    
+
     test_nested_headings()
     test_code_chunks_escaped()
+
+    def test_multiple_h1s():
+        md_content = "# First H1\n# Second H1\n# Third H1"
+        result = create_heading_dict(md_content)
+        assert 'First H1' in result
+        assert 'Second H1' in result
+        assert 'Third H1' in result
+        assert result['First H1'] == {}
+        assert result['Second H1'] == {}
+        assert result['Third H1'] == {}
+
+    def test_skip_levels_down():
+        md_content = "# Root\n## Level2\n#### Level4"
+        result = create_heading_dict(md_content)
+        assert 'Root' in result
+        assert 'Level2' in result['Root']
+        assert 'Level4' in result['Root']['Level2']
+
+    def test_skip_levels_up():
+        md_content = "# Root\n#### Deep\n## Back to 2"
+        result = create_heading_dict(md_content)
+        assert 'Root' in result
+        assert 'Deep' in result['Root']
+        assert 'Back to 2' in result['Root']
+        assert result['Root']['Deep'] == {}
+        assert result['Root']['Back to 2'] == {}
+
+    def test_non_h1_start():
+        md_content = "### Starting at 3\n## Going to 2\n# Finally 1"
+        result = create_heading_dict(md_content)
+        assert 'Starting at 3' in result
+        assert 'Going to 2' in result
+        assert 'Finally 1' in result
+
+    test_multiple_h1s()
+    test_skip_levels_down()
+    test_skip_levels_up()
+    test_non_h1_start()
+
+    # Critical edge case tests
+    def test_empty_input():
+        result = markdown_to_dict("")
+        assert result == {}
+        result = create_heading_dict("")
+        assert result == {}
+
+    def test_whitespace_only():
+        result = markdown_to_dict("   \n\t  \n   ")
+        assert result == {}
+        result = create_heading_dict("   \n\t  \n   ")
+        assert result == {}
+
+    def test_malformed_headings():
+        # No space after # (actually works - regex allows it)
+        md_content = "#NoSpace\n###AlsoNoSpace\nContent"
+        result = markdown_to_dict(md_content)
+        assert 'NoSpace' in result
+        assert 'NoSpace.AlsoNoSpace' in result
+
+        # Too many #s (matches max 6, extra # preserved in text)
+        md_content = "####### Too Many\nContent"
+        result = markdown_to_dict(md_content)
+        assert '# Too Many' in result  # Extra # now preserved in heading text
+
+        # Empty heading (actually creates empty key)
+        md_content = "##   \nContent after empty heading"
+        result = markdown_to_dict(md_content)
+        assert '' in result  # Empty heading creates empty key
+
+    def test_unicode_and_emojis():
+        # Unicode characters
+        md_content = "# Café & Naïve\nContent with unicode\n## 中文标题\nChinese content"
+        result = markdown_to_dict(md_content)
+        assert 'Café & Naïve' in result
+        assert 'Café & Naïve.中文标题' in result
+
+        # Emojis
+        md_content = "# 🚀 Rocket Heading\nRocket content\n## 💻 Computer\nComputer content"
+        result = markdown_to_dict(md_content)
+        assert '🚀 Rocket Heading' in result
+        assert '🚀 Rocket Heading.💻 Computer' in result
+
+    test_empty_input()
+    test_whitespace_only()
+    test_malformed_headings()
+    test_unicode_and_emojis()
     print('tests passed')
+
