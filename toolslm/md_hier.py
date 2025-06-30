@@ -2,7 +2,10 @@ import re
 from fastcore.utils import *
 __all__ = ['markdown_to_dict', 'create_heading_dict']
 
-def markdown_to_dict(markdown_content):
+def markdown_to_dict(
+    markdown_content:str  # Markdown text including headings
+)->AttrDict: # Dictionary with dot-separated hierarchical keys and content values
+    "Parse markdown content into a hierarchical dictionary with dot-separated keys."
     def clean_heading(text): return re.sub(r'[^A-Za-z0-9 ]+', '', text).strip()
 
     lines = markdown_content.splitlines()
@@ -13,7 +16,6 @@ def markdown_to_dict(markdown_content):
     for idx, line in enumerate(lines):
         # Toggle code block state when encountering fence
         if line.strip().startswith('```'): in_code_block = not in_code_block
-        
         # Only detect headings when not in a code block
         if in_code_block: continue
         match = re.match(r'^(#{1,6})\s*(.*)', line)
@@ -42,7 +44,10 @@ def markdown_to_dict(markdown_content):
         result[key] = h['content']
     return dict2obj(result)
 
-def create_heading_dict(text):
+def create_heading_dict(
+    text:str  # The markdown text to parse
+)->AttrDict: # Nested dictionary structure representing the heading hierarchy
+    "Create a nested dictionary structure from markdown headings."
     text = re.sub(r'```[\s\S]*?```', '', text)
     headings = re.findall(r'^#+.*', text, flags=re.MULTILINE)
     result = {}
