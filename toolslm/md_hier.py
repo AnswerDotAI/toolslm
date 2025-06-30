@@ -47,9 +47,9 @@ def markdown_to_dict(
         result[key] = h['content']
     return dict2obj(result)
 
-def create_heading_dict(text):
+def create_heading_dict(text, rm_fenced=True):
     "Create a nested dictionary structure from markdown headings."
-    text = re.sub(r'```[\s\S]*?```', '', text)
+    if rm_fenced: text = re.sub(r'```[\s\S]*?```', '', text)
     headings = re.findall(r'^#+.*', text, flags=re.MULTILINE)
     result = {}
     stack = [result]

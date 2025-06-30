@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.3.1
+
+
+### Bugs Squashed
+
+- Add edge case tests and fix them ([#36](https://github.com/AnswerDotAI/toolslm/issues/36))
+
+
 ## 0.3.0
 
 ### Breaking changes
