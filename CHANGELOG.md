@@ -4,6 +4,9 @@
 
 ## 0.3.1
 
+### New Features
+
+- Add `rm_fenced` ([#37](https://github.com/AnswerDotAI/toolslm/issues/37))
 
 ### Bugs Squashed
 
