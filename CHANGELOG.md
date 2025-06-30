@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.2
+
+### Breaking changes
+
+- New combined API ([#38](https://github.com/AnswerDotAI/toolslm/issues/38))
+
+
 ## 0.3.1
 
 ### New Features
