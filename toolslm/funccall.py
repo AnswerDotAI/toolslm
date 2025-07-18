@@ -107,7 +107,9 @@ def _get_nested_schema(obj):
         if n != 'return' and n != 'self':
             _process_property(n, o, props, req, defs)
 
-    schema = dict(type='object', properties=props, title=obj.__name__ if isinstance(obj, type) else None)
+    tkw = {}
+    if isinstance(obj, type): tkw['title']=obj.__name__
+    schema = dict(type='object', properties=props, **tkw)
     if req: schema['required'] = list(req)
     if defs: schema['$defs'] = defs
     return schema
