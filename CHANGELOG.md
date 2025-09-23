@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.3.3
+
+### New Features
+
+- Support notebook context ([#41](https://github.com/AnswerDotAI/toolslm/issues/41))
+- Only add title when needed to schemas ([#39](https://github.com/AnswerDotAI/toolslm/issues/39))
+
+
 ## 0.3.2
 
 ### Breaking changes
