@@ -123,7 +123,7 @@ def get_schema(f:Union[callable,dict], pname='input_schema')->dict:
     assert desc, "Docstring missing!"
     d = docments(f, full=True)
     ret = d.pop('return')
-    if ret.anno is not empty: desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
+    if (ret.anno is not empty) and (ret.anno is not None): desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
     return {"name": f.__name__, "description": desc, pname: schema}
 
 # %% ../01_funccall.ipynb
