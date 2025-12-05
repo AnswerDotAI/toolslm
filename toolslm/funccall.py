@@ -140,13 +140,6 @@ def dateArg(
     return date(*map(int,parts))
 
 # %% ../01_funccall.ipynb
-def dateArg(
-    datestr: str  # YYYY-MM-DD
-): 
-    parts = datestr.split('-')
-    return date(*map(int,parts))
-
-# %% ../01_funccall.ipynb
 import ast, time, signal, traceback
 from fastcore.utils import *
 
