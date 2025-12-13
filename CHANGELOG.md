@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.3.5
+
+### New Features
+
+- Automatically handle `{Path, bytes, Decimal, UUID}` in schemas ([#49](https://github.com/AnswerDotAI/toolslm/issues/49))
+- Add schema to function capabilities ([#47](https://github.com/AnswerDotAI/toolslm/issues/47))
+
+### Bugs Squashed
+
+- fix line misalignment when code block is between headings ([#40](https://github.com/AnswerDotAI/toolslm/pull/40)), thanks to [@jackhogan](https://github.com/jackhogan)
+
+
 ## 0.3.4
 
 ### New Features
