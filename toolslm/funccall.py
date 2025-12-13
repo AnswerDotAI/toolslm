@@ -133,6 +133,8 @@ def PathArg(
     path: str  # A filesystem path
 ): return Path(path)
 
+custom_types.add(PathArg)
+
 # %% ../01_funccall.ipynb
 import ast, time, signal, traceback
 from fastcore.utils import *
@@ -202,7 +204,10 @@ def call_func(fc_name, fc_inputs, ns, raise_on_err=True):
     func = ns[fc_name]
     # Clean up bad param names
     inps = {re.sub(r'\W', '', k):v for k,v in fc_inputs.items()}
-    try: return func(**fc_inputs)
+    # Convert custom-type params from strings
+    d = docments(func, full=True)
+    inps = {k: d[k].anno(v) if d[k].anno in custom_types else v for k, v in inps.items()}
+    try: return func(**inps)
     except Exception as e:
         if raise_on_err: raise e from None
         else: return traceback.format_exc()
