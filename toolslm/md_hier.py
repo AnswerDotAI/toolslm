@@ -14,20 +14,32 @@ def create_heading_dict(text, rm_fenced=True):
     original_text = text
     original_lines = text.splitlines()
     
-    # Use fenced-removed text only for finding headings
-    text_for_headings = text
-    if rm_fenced: text_for_headings = re.sub(r'```[\s\S]*?```', '', text)
+    # Build line mapping when removing fenced blocks
+    if rm_fenced:
+        filtered_lines,original_line_map,in_fenced = [],{},False
+        for i, line in enumerate(original_lines):
+            if line.strip().startswith('```'):
+                in_fenced = not in_fenced
+                continue
+            if not in_fenced:
+                original_line_map[len(filtered_lines)] = i
+                filtered_lines.append(line)
 
-    lines_for_headings = text_for_headings.splitlines()
+        lines_for_headings = filtered_lines
+    else:
+        lines_for_headings = original_lines
+        original_line_map = {i: i for i in range(len(original_lines))}
+
     headings = []
 
-    # Parse headings with their levels and line numbers
+    # Parse headings with their levels and original line numbers
     for idx, line in enumerate(lines_for_headings):
         match = re.match(r'^(#{1,6})\s+\S.*', line)
         if match:
             level = len(match.group(1))
             title = line.strip('#').strip()
-            headings.append({'level': level, 'title': title, 'line': idx})
+            original_line_idx = original_line_map[idx]
+            headings.append({'level': level, 'title': title, 'line': original_line_idx})
 
     # Assign text content to each heading using original lines
     for i, h in enumerate(headings):
@@ -270,9 +282,26 @@ More content after code."""
         assert '💻 Computer' in result['🚀 Rocket Heading']
         assert result.text == md_content
 
+    def test_fenced_blocks_between_headings():
+        md_content = """# First Header
+Content here.
+
+```python
+# A comment that should be ignored for structure
+def example():
+    pass
+```
+
+# Second Header
+This content belongs to Second Header."""
+        result = create_heading_dict(md_content)
+        assert "def example():" not in result['Second Header'].text
+        assert result['Second Header'].text == "# Second Header\nThis content belongs to Second Header."
+
     test_empty_input()
     test_whitespace_only()
     test_malformed_headings()
     test_unicode_and_emojis()
+    test_fenced_blocks_between_headings()
     print('tests passed')
 
