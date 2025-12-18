@@ -16,8 +16,12 @@ TerminalInteractiveShell.orig_run = TerminalInteractiveShell.run_cell
 
 # %% ../02_shell.ipynb
 @patch
-def run_cell(self:TerminalInteractiveShell, cell, timeout=None):
-    "Wrapper for original `run_cell` which adds timeout and output capture"
+def run_cell(self:TerminalInteractiveShell, cell, timeout=None, max_memory_mb=None):
+    "Wrapper for original `run_cell` which adds timeout, memory limit, and output capture"
+    if max_memory_mb:
+        orig_limit = resource.getrlimit(resource.RLIMIT_AS)
+        max_bytes = max_memory_mb * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (max_bytes, orig_limit[1]))
     if timeout:
         def handler(*args): raise TimeoutError()
         signal.signal(signal.SIGALRM, handler)
@@ -25,11 +29,15 @@ def run_cell(self:TerminalInteractiveShell, cell, timeout=None):
     try:
         with capture_output() as io: result = self.orig_run(cell)
         result.stdout = io.stdout
+        result.outputs = io.outputs
         return result
-    except TimeoutException as e:
+    except (TimeoutException, MemoryError) as e:
+        result = self.ExecutionResult(error_before_exec=None, error_in_exec=e)
+    except MemoryError as e:
         result = self.ExecutionResult(error_before_exec=None, error_in_exec=e)
     finally:
         if timeout: signal.alarm(0)
+        if max_memory_mb: resource.setrlimit(resource.RLIMIT_AS, orig_limit)
 
 # %% ../02_shell.ipynb
 def get_shell()->TerminalInteractiveShell:
