@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.7
+
+### New Features
+
+- Add `folder2ctx` `out` param ([#51](https://github.com/AnswerDotAI/toolslm/issues/51))
+
+
 ## 0.3.6
 
 ### New Features
