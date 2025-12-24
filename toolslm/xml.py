@@ -60,6 +60,7 @@ def cell2xml(cell, out=True):
 
 # %% ../00_xml.ipynb
 def nb2xml(fname=None, nb=None, out=True):
+    "Convert notebook to XML format"
     assert bool(fname)^bool(nb), "Pass either `fname` or `nb`"
     if not nb: nb = dict2obj(fname.read_json())
     cells_xml = [to_xml(cell2xml(c, out=out), do_escape=False) for c in nb.cells if c.cell_type in ('code','markdown')]
@@ -110,20 +111,21 @@ def docs_xml(docs:list[str],  # The content of each document
     return pre + to_xml(Documents(docs), do_escape=False)
 
 # %% ../00_xml.ipynb
-def read_file(fname):
+def read_file(fname, out=True):
     "Read file content, converting notebooks to XML if needed"
     fname = Path(fname)
-    if fname.suffix == '.ipynb': return nb2xml(fname)
+    if fname.suffix == '.ipynb': return nb2xml(fname, out=out)
     return fname.read_text()
 
 # %% ../00_xml.ipynb
 def files2ctx(
     fnames:list[Union[str,Path]], # List of file names to add to context
-    prefix:bool=True # Include Anthropic's suggested prose intro?
+    prefix:bool=True, # Include Anthropic's suggested prose intro?
+    out:bool=True # Include notebook cell outputs?
 )->str: # XML for LM context
     "Convert files to XML context, handling notebooks"
     fnames = [Path(o) for o in fnames]
-    contents = [read_file(o) for o in fnames]
+    contents = [read_file(o, out=out) for o in fnames]
     return docs_xml(contents, fnames, prefix=prefix)
 
 # %% ../00_xml.ipynb
@@ -131,16 +133,20 @@ def files2ctx(
 def folder2ctx(
     folder:Union[str,Path], # Folder name containing files to add to context
     prefix:bool=True, # Include Anthropic's suggested prose intro?
+    out:bool=True, # Include notebook cell outputs?
     **kwargs # Passed to `globtastic`
 )->str: # XML for Claude context
+    "Convert folder contents to XML context, handling notebooks"
     fnames = globtastic(folder, **kwargs)
-    return files2ctx(fnames, prefix=prefix)
+    return files2ctx(fnames, prefix=prefix, out=out)
 
 # %% ../00_xml.ipynb
 @call_parse
 @delegates(folder2ctx)
 def folder2ctx_cli(
     folder:str, # Folder name containing files to add to context
+    out:bool=True, # Include notebook cell outputs?
     **kwargs # Passed to `folder2ctx`
 )->str: # XML for Claude context
-    print(folder2ctx(folder, **kwargs))
+    "CLI to convert folder contents to XML context, handling notebooks"
+    print(folder2ctx(folder, out=out, **kwargs))
