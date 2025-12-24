@@ -2,11 +2,12 @@
 
 # %% auto 0
 __all__ = ['doctype', 'json_to_xml', 'get_mime_text', 'cell2out', 'cell2xml', 'nb2xml', 'mk_doctype', 'mk_doc', 'docs_xml',
-           'read_file', 'files2ctx', 'folder2ctx', 'folder2ctx_cli']
+           'read_file', 'files2ctx', 'folder2ctx', 'repo2ctx', 'folder2ctx_cli']
 
 # %% ../00_xml.ipynb
 import hashlib,xml.etree.ElementTree as ET
 from collections import namedtuple
+from ghapi.all import GhApi
 
 from fastcore.utils import *
 from fastcore.meta import delegates
@@ -64,7 +65,7 @@ def nb2xml(fname=None, nb=None, out=True):
     assert bool(fname)^bool(nb), "Pass either `fname` or `nb`"
     if not nb: nb = dict2obj(fname.read_json())
     cells_xml = [to_xml(cell2xml(c, out=out), do_escape=False) for c in nb.cells if c.cell_type in ('code','markdown')]
-    return Notebook(*cells_xml)
+    return to_xml(Notebook(*cells_xml), do_escape=False)
 
 # %% ../00_xml.ipynb
 doctype = namedtuple('doctype', ['src', 'content'])
@@ -121,24 +122,47 @@ def read_file(fname, out=True):
 def files2ctx(
     fnames:list[Union[str,Path]], # List of file names to add to context
     prefix:bool=True, # Include Anthropic's suggested prose intro?
-    out:bool=True # Include notebook cell outputs?
+    out:bool=True, # Include notebook cell outputs?
+    srcs:Optional[list]=None # Use the labels instead of `fnames`
 )->str: # XML for LM context
     "Convert files to XML context, handling notebooks"
     fnames = [Path(o) for o in fnames]
     contents = [read_file(o, out=out) for o in fnames]
-    return docs_xml(contents, fnames, prefix=prefix)
+    return docs_xml(contents, srcs or fnames, prefix=prefix)
 
 # %% ../00_xml.ipynb
 @delegates(globtastic)
 def folder2ctx(
-    folder:Union[str,Path], # Folder name containing files to add to context
-    prefix:bool=True, # Include Anthropic's suggested prose intro?
-    out:bool=True, # Include notebook cell outputs?
-    **kwargs # Passed to `globtastic`
-)->str: # XML for Claude context
+    folder:Union[str,Path],
+    prefix:bool=True,
+    out:bool=True,
+    include_base:bool=True,
+    **kwargs
+)->str:
     "Convert folder contents to XML context, handling notebooks"
+    folder = Path(folder)
     fnames = globtastic(folder, **kwargs)
-    return files2ctx(fnames, prefix=prefix, out=out)
+    srcs = fnames if include_base else [Path(f).relative_to(folder) for f in fnames]
+    return files2ctx(fnames, prefix=prefix, out=out, srcs=srcs)
+
+# %% ../00_xml.ipynb
+@delegates(folder2ctx)
+def repo2ctx(
+    owner:str,  # GitHub repo owner
+    repo:str,   # GitHub repo name
+    ref:str=None,  # Git ref (branch/tag/sha); defaults to repo's default branch
+    **kwargs  # Passed to `folder2ctx`
+)->str:  # XML for LM context
+    "Convert GitHub repo to XML context without cloning"
+    import tempfile, tarfile, io
+    api = GhApi()
+    if ref is None: ref = api.repos.get(owner, repo).default_branch
+    data = api.repos.download_tarball_archive(owner, repo, ref)
+    tf = tarfile.open(fileobj=io.BytesIO(data))
+    with tempfile.TemporaryDirectory() as tmp:
+        tf.extractall(tmp, filter='data')
+        subdir = Path(tmp) / tf.getmembers()[0].name.split('/')[0]
+        return folder2ctx(subdir, include_base=False, **kwargs)
 
 # %% ../00_xml.ipynb
 @call_parse
