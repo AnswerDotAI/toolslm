@@ -102,48 +102,56 @@ def mk_doc(index:int,  # The document index
 def docs_xml(docs:list[str],  # The content of each document
              srcs:Optional[list]=None,  # URLs, filenames, etc; each one defaults to `md5(content)` if not provided
              prefix:bool=True, # Include Anthropic's suggested prose intro?
-             details:Optional[list]=None # Optional list of dicts with additional attrs for each doc
+             details:Optional[list]=None, # Optional list of dicts with additional attrs for each doc
+             title:str=None # Optional title attr for Documents element
             )->str:
     "Create an XML string containing `docs` in Anthropic's recommended format"
     pre = 'Here are some documents for you to reference for your task:\n\n' if prefix else ''
     if srcs is None: srcs = [None]*len(docs)
     if details is None: details = [{}]*len(docs)
     docs = (mk_doc(i+1, d, s, **kw) for i,(d,s,kw) in enumerate(zip(docs,srcs,details)))
-    return pre + to_xml(Documents(docs), do_escape=False)
+    kw = dict(title=title) if title else {}
+    return pre + to_xml(Documents(*docs, **kw), do_escape=False)
 
 # %% ../00_xml.ipynb
-def read_file(fname, out=True):
+def read_file(fname, out=True, max_size=None):
     "Read file content, converting notebooks to XML if needed"
     fname = Path(fname)
-    if fname.suffix == '.ipynb': return nb2xml(fname, out=out)
-    return fname.read_text()
+    if fname.suffix == '.ipynb': res = nb2xml(fname, out=out)
+    else: res = fname.read_text()
+    if max_size and len(res)>max_size: return f"[Skipped: {fname.name} exceeds {max_size} bytes]"
+    return res
 
 # %% ../00_xml.ipynb
 def files2ctx(
     fnames:list[Union[str,Path]], # List of file names to add to context
     prefix:bool=True, # Include Anthropic's suggested prose intro?
     out:bool=True, # Include notebook cell outputs?
-    srcs:Optional[list]=None # Use the labels instead of `fnames`
+    srcs:Optional[list]=None, # Use the labels instead of `fnames`
+    title:str=None, # Optional title attr for Documents element
+    max_size:int=None # Skip files larger than this (bytes)
 )->str: # XML for LM context
     "Convert files to XML context, handling notebooks"
     fnames = [Path(o) for o in fnames]
-    contents = [read_file(o, out=out) for o in fnames]
-    return docs_xml(contents, srcs or fnames, prefix=prefix)
+    contents = [read_file(o, out=out, max_size=max_size) for o in fnames]
+    return docs_xml(contents, srcs or fnames, prefix=prefix, title=title)
 
 # %% ../00_xml.ipynb
 @delegates(globtastic)
 def folder2ctx(
     folder:Union[str,Path],
-    prefix:bool=True,
-    out:bool=True,
-    include_base:bool=True,
+    prefix:bool=True, # Include Anthropic's suggested prose intro?
+    out:bool=True, # Include notebook cell outputs?
+    include_base:bool=True, # Include full path in src?
+    title:str=None, # Optional title attr for Documents element
+    max_size:int=100_000, # Skip files larger than this (bytes)
     **kwargs
 )->str:
     "Convert folder contents to XML context, handling notebooks"
     folder = Path(folder)
     fnames = globtastic(folder, **kwargs)
     srcs = fnames if include_base else [Path(f).relative_to(folder) for f in fnames]
-    return files2ctx(fnames, prefix=prefix, out=out, srcs=srcs)
+    return files2ctx(fnames, prefix=prefix, out=out, srcs=srcs, title=title, max_size=max_size)
 
 # %% ../00_xml.ipynb
 @delegates(folder2ctx)
@@ -158,11 +166,15 @@ def repo2ctx(
     api = GhApi()
     if ref is None: ref = api.repos.get(owner, repo).default_branch
     data = api.repos.download_tarball_archive(owner, repo, ref)
+    parts = ' | '.join(f"{k}: {', '.join(v) if isinstance(v, (list,tuple)) else v}"
+        for k,v in kwargs.items() if v)
+    title = f"GitHub repository contents from {owner}/{repo} at ref '{ref}'"
+    if parts: title += f" (filters applied: {parts})"
     tf = tarfile.open(fileobj=io.BytesIO(data))
     with tempfile.TemporaryDirectory() as tmp:
         tf.extractall(tmp, filter='data')
         subdir = Path(tmp) / tf.getmembers()[0].name.split('/')[0]
-        return folder2ctx(subdir, include_base=False, **kwargs)
+        return folder2ctx(subdir, include_base=False, title=title, **kwargs)
 
 # %% ../00_xml.ipynb
 @call_parse
