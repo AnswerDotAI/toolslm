@@ -11,10 +11,8 @@ from collections import namedtuple
 from fastcore.utils import *
 from fastcore.meta import delegates
 from fastcore.xtras import hl_md
-from fastcore.xml import to_xml, Document, Documents, Document_content, Src, Source,Out,Outs,Cell
+from fastcore.xml import to_xml, Document, Documents, Document_content, Src, Source,Out,Outs,Cell,Notebook,Md,Code
 from fastcore.script import call_parse
-try: from IPython import display
-except: display=None
 
 # %% ../00_xml.ipynb
 def json_to_xml(d:dict, # JSON dictionary to convert
@@ -50,20 +48,22 @@ def cell2out(o):
     if hasattr(o, 'ename'): return Out(f"{o.ename}: {o.evalue}", type='error')
 
 # %% ../00_xml.ipynb
-def cell2xml(cell):
+def cell2xml(cell, out=True):
     "Convert notebook cell to concise XML format"
-    cts = Source(''.join(cell.source)) if hasattr(cell, 'source') and cell.source else None
+    src = ''.join(getattr(cell, 'source', ''))
+    f = Code if cell.cell_type=='code' else Md
+    if not out: return f(src)
+    parts = [Source(src)]
     out_items = L(getattr(cell,'outputs',[])).map(cell2out).filter()
-    outs = []
-    if out_items: outs = Outs(*out_items)
-    parts = [p for p in [cts, outs] if p]
-    return Cell(*parts, type=cell.cell_type)
+    if out_items: parts.append(Outs(*out_items))
+    return f(*parts)
 
 # %% ../00_xml.ipynb
-def nb2xml(fname):
-    nb = dict2obj(fname.read_json())
-    cells_xml = [to_xml(cell2xml(c), do_escape=False) for c in nb.cells if c.cell_type in ('code','markdown')]
-    return '\n'.join(cells_xml)
+def nb2xml(fname=None, nb=None, out=True):
+    assert bool(fname)^bool(nb), "Pass either `fname` or `nb`"
+    if not nb: nb = dict2obj(fname.read_json())
+    cells_xml = [to_xml(cell2xml(c, out=out), do_escape=False) for c in nb.cells if c.cell_type in ('code','markdown')]
+    return Notebook(*cells_xml)
 
 # %% ../00_xml.ipynb
 doctype = namedtuple('doctype', ['src', 'content'])
