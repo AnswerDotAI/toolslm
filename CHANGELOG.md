@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.9
+
+### New Features
+
+- Add `max_size` and `title` to `folder2ctx` et al ([#53](https://github.com/AnswerDotAI/toolslm/issues/53))
+
+
 ## 0.3.8
 
 ### New Features
