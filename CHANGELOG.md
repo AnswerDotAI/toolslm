@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.8
+
+### New Features
+
+- Add `repo2ctx` ([#52](https://github.com/AnswerDotAI/toolslm/issues/52))
+
+
 ## 0.3.7
 
 ### New Features
