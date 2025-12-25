@@ -111,13 +111,13 @@ def _process_property(name, obj, props, req, defs, evalable=False):
         p.update(_handle_type(obj.anno, defs))
 
 # %% ../01_funccall.ipynb
-def _get_nested_schema(obj, evalable=False):
+def _get_nested_schema(obj, evalable=False, skip_hidden=False):
     "Generate nested JSON schema for a class or function"
     d = docments(obj, full=True)
     props, req, defs = {}, {}, {}
 
     for n, o in d.items():
-        if n != 'return' and n != 'self':
+        if n != 'return' and n != 'self' and not (skip_hidden and n.startswith('_')):
             _process_property(n, o, props, req, defs, evalable=evalable)
 
     tkw = {}
@@ -131,11 +131,12 @@ def _get_nested_schema(obj, evalable=False):
 def get_schema(
     f:Union[callable,dict], # Function to get schema for
     pname='input_schema',   # Key name for parameters
-    evalable=False   # stringify defaults that can't be literal_eval'd?
-)->dict:
+    evalable=False,  # stringify defaults that can't be literal_eval'd?
+    skip_hidden=False # skip parameters starting with '_'?
+)->dict: # {'name':..., 'description':..., pname:...}
     "Generate JSON schema for a class, function, or method"
     if isinstance(f, dict): return f
-    schema = _get_nested_schema(f, evalable=evalable)
+    schema = _get_nested_schema(f, evalable=evalable, skip_hidden=skip_hidden)
     desc = f.__doc__
     assert desc, "Docstring missing!"
     d = docments(f, full=True)
