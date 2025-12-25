@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.10
+
+### New Features
+
+- Add `evalable` to `get_schema` ([#54](https://github.com/AnswerDotAI/toolslm/issues/54))
+
+
 ## 0.3.9
 
 ### New Features
