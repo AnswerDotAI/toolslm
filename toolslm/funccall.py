@@ -5,7 +5,7 @@ __all__ = ['empty', 'custom_types', 'get_schema', 'python', 'mk_ns', 'call_func'
            'mk_tool']
 
 # %% ../01_funccall.ipynb
-import inspect, json
+import inspect, json, ast
 from collections import abc
 from fastcore.utils import *
 from fastcore.docments import docments
@@ -37,12 +37,20 @@ def _types(t:type)->tuple[str,Optional[str]]:
     else: return tmap.get(t.__name__, "object"), None
 
 # %% ../01_funccall.ipynb
-def _param(name, info):
-    "json schema parameter given `name` and `info` from docments full dict."
+def _param(
+    name, # param name
+    info, # dict from docments
+    evalable=False): # stringify defaults that can't be literal_eval'd?
+    "json schema parameter given `name` and `info` from docments full dict"
     paramt,itemt = _types(info.anno)
     pschema = dict(type=paramt, description=info.docment or "")
     if itemt: pschema["items"] = {"type": itemt}
-    if info.default is not empty: pschema["default"] = info.default
+    if info.default is not empty:
+        if evalable:
+            try: ast.literal_eval(repr(info.default))
+            except: pschema["default"] = str(info.default)
+            else: pschema["default"] = info.default
+        else: pschema["default"] = info.default
     return pschema
 
 # %% ../01_funccall.ipynb
@@ -90,9 +98,9 @@ def _handle_container(origin, args, defs):
     return None
 
 # %% ../01_funccall.ipynb
-def _process_property(name, obj, props, req, defs):
+def _process_property(name, obj, props, req, defs, evalable=False):
     "Process a single property of the schema"
-    p = _param(name, obj)
+    p = _param(name, obj, evalable=evalable)
     props[name] = p
     if obj.default is empty: req[name] = True
 
@@ -103,14 +111,14 @@ def _process_property(name, obj, props, req, defs):
         p.update(_handle_type(obj.anno, defs))
 
 # %% ../01_funccall.ipynb
-def _get_nested_schema(obj):
+def _get_nested_schema(obj, evalable=False):
     "Generate nested JSON schema for a class or function"
     d = docments(obj, full=True)
     props, req, defs = {}, {}, {}
 
     for n, o in d.items():
         if n != 'return' and n != 'self':
-            _process_property(n, o, props, req, defs)
+            _process_property(n, o, props, req, defs, evalable=evalable)
 
     tkw = {}
     if isinstance(obj, type): tkw['title']=obj.__name__
@@ -120,10 +128,14 @@ def _get_nested_schema(obj):
     return schema
 
 # %% ../01_funccall.ipynb
-def get_schema(f:Union[callable,dict], pname='input_schema')->dict:
+def get_schema(
+    f:Union[callable,dict], # Function to get schema for
+    pname='input_schema',   # Key name for parameters
+    evalable=False   # stringify defaults that can't be literal_eval'd?
+)->dict:
     "Generate JSON schema for a class, function, or method"
     if isinstance(f, dict): return f
-    schema = _get_nested_schema(f)
+    schema = _get_nested_schema(f, evalable=evalable)
     desc = f.__doc__
     assert desc, "Docstring missing!"
     d = docments(f, full=True)
