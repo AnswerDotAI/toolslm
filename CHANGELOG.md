@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.11
+
+### New Features
+
+- Add `skip_hidden` ([#55](https://github.com/AnswerDotAI/toolslm/issues/55))
+
+
 ## 0.3.10
 
 ### New Features
