@@ -152,10 +152,10 @@ def folder2ctx(
 )->Union[str,dict]:
     "Convert folder contents to XML context, handling notebooks"
     folder = Path(folder)
-    fnames = globtastic(folder, **kwargs)
-    if files_only: return {str(Path(f).relative_to(folder)): Path(f).stat().st_size for f in fnames}
-    if readme_first: fnames = sorted(fnames, key=lambda f: (0 if 'readme' in Path(f).name.lower() else 1, f))
-    srcs = fnames if include_base else [Path(f).relative_to(folder) for f in fnames]
+    fnames = pglob(folder, **kwargs)
+    if files_only: return {str(f.relative_to(folder)): f.stat().st_size for f in fnames}
+    if readme_first: fnames = sorted(fnames, key=lambda f: (0 if 'readme' in f.name.lower() else 1, f))
+    srcs = fnames if include_base else [f.relative_to(folder) for f in fnames]
     res = files2ctx(fnames, prefix=prefix, out=out, srcs=srcs, title=title, max_size=max_size)
     suf = f"\n\n[TRUNCATED: output size {{_outsz_}} exceeded max size {max_total} bytes]"
     if max_total and len(res) > max_total: res = truncstr(res, max_total, suf=suf, sizevar='_outsz_')
