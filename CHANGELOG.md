@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.12
+
+### New Features
+
+- Much improved `repo2ctx` ([#56](https://github.com/AnswerDotAI/toolslm/issues/56))
+
+
 ## 0.3.11
 
 ### New Features
