@@ -2,7 +2,7 @@
 
 # %% auto 0
 __all__ = ['doctype', 'json_to_xml', 'get_mime_text', 'cell2out', 'cell2xml', 'nb2xml', 'mk_doctype', 'mk_doc', 'docs_xml',
-           'read_file', 'files2ctx', 'folder2ctx', 'repo2ctx', 'folder2ctx_cli']
+           'read_file', 'files2ctx', 'folder2ctx', 'folder2ctx_cli', 'parse_gh_url', 'repo2ctx']
 
 # %% ../00_xml.ipynb
 import hashlib,xml.etree.ElementTree as ET
@@ -101,7 +101,7 @@ def mk_doc(index:int,  # The document index
 # %% ../00_xml.ipynb
 def docs_xml(docs:list[str],  # The content of each document
              srcs:Optional[list]=None,  # URLs, filenames, etc; each one defaults to `md5(content)` if not provided
-             prefix:bool=True, # Include Anthropic's suggested prose intro?
+             prefix:bool=False, # Include Anthropic's suggested prose intro?
              details:Optional[list]=None, # Optional list of dicts with additional attrs for each doc
              title:str=None # Optional title attr for Documents element
             )->str:
@@ -123,58 +123,43 @@ def read_file(fname, out=True, max_size=None):
     return res
 
 # %% ../00_xml.ipynb
+@delegates(docs_xml)
 def files2ctx(
     fnames:list[Union[str,Path]], # List of file names to add to context
-    prefix:bool=True, # Include Anthropic's suggested prose intro?
     out:bool=True, # Include notebook cell outputs?
     srcs:Optional[list]=None, # Use the labels instead of `fnames`
-    title:str=None, # Optional title attr for Documents element
-    max_size:int=None # Skip files larger than this (bytes)
+    max_size:int=None, # Skip files larger than this (bytes)
+    **kwargs
 )->str: # XML for LM context
     "Convert files to XML context, handling notebooks"
     fnames = [Path(o) for o in fnames]
     contents = [read_file(o, out=out, max_size=max_size) for o in fnames]
-    return docs_xml(contents, srcs or fnames, prefix=prefix, title=title)
+    return docs_xml(contents, srcs or fnames, **kwargs)
 
 # %% ../00_xml.ipynb
 @delegates(globtastic)
 def folder2ctx(
-    folder:Union[str,Path],
-    prefix:bool=True, # Include Anthropic's suggested prose intro?
+    folder:Union[str,Path], # Folder to read
+    prefix:bool=False, # Include Anthropic's suggested prose intro?
     out:bool=True, # Include notebook cell outputs?
     include_base:bool=True, # Include full path in src?
     title:str=None, # Optional title attr for Documents element
     max_size:int=100_000, # Skip files larger than this (bytes)
+    max_total:int=10_000_000,  # Max total output size in bytes
+    readme_first:bool=False,  # Prioritize README files at start of context?
+    files_only:bool=False,  # Return dict of {filename: size} instead of context?
     **kwargs
-)->str:
+)->Union[str,dict]:
     "Convert folder contents to XML context, handling notebooks"
     folder = Path(folder)
     fnames = globtastic(folder, **kwargs)
+    if files_only: return {str(Path(f).relative_to(folder)): Path(f).stat().st_size for f in fnames}
+    if readme_first: fnames = sorted(fnames, key=lambda f: (0 if 'readme' in Path(f).name.lower() else 1, f))
     srcs = fnames if include_base else [Path(f).relative_to(folder) for f in fnames]
-    return files2ctx(fnames, prefix=prefix, out=out, srcs=srcs, title=title, max_size=max_size)
-
-# %% ../00_xml.ipynb
-@delegates(folder2ctx)
-def repo2ctx(
-    owner:str,  # GitHub repo owner
-    repo:str,   # GitHub repo name
-    ref:str=None,  # Git ref (branch/tag/sha); defaults to repo's default branch
-    **kwargs  # Passed to `folder2ctx`
-)->str:  # XML for LM context
-    "Convert GitHub repo to XML context without cloning"
-    import tempfile, tarfile, io
-    api = GhApi()
-    if ref is None: ref = api.repos.get(owner, repo).default_branch
-    data = api.repos.download_tarball_archive(owner, repo, ref)
-    parts = ' | '.join(f"{k}: {', '.join(v) if isinstance(v, (list,tuple)) else v}"
-        for k,v in kwargs.items() if v)
-    title = f"GitHub repository contents from {owner}/{repo} at ref '{ref}'"
-    if parts: title += f" (filters applied: {parts})"
-    tf = tarfile.open(fileobj=io.BytesIO(data))
-    with tempfile.TemporaryDirectory() as tmp:
-        tf.extractall(tmp, filter='data')
-        subdir = Path(tmp) / tf.getmembers()[0].name.split('/')[0]
-        return folder2ctx(subdir, include_base=False, title=title, **kwargs)
+    res = files2ctx(fnames, prefix=prefix, out=out, srcs=srcs, title=title, max_size=max_size)
+    suf = f"\n\n[TRUNCATED: output size {{_outsz_}} exceeded max size {max_total} bytes]"
+    if max_total and len(res) > max_total: res = truncstr(res, max_total, suf=suf, sizevar='_outsz_')
+    return res
 
 # %% ../00_xml.ipynb
 @call_parse
@@ -186,3 +171,44 @@ def folder2ctx_cli(
 )->str: # XML for Claude context
     "CLI to convert folder contents to XML context, handling notebooks"
     print(folder2ctx(folder, out=out, **kwargs))
+
+# %% ../00_xml.ipynb
+def parse_gh_url(url):
+    "Parse GitHub URL into (owner, repo, type, ref, path) or None"
+    m = re.match(r'https?://(?:www\.)?github\.com/([^/]+)/([^/]+)(?:/([^/]+)(?:/([^/]+)(?:/(.+))?)?)?', url)
+    return dict(zip('owner repo typ ref path'.split(), m.groups())) if m else None
+
+# %% ../00_xml.ipynb
+@delegates(folder2ctx)
+def repo2ctx(
+    owner:str,  # GitHub repo owner or "owner/repo" or a full github URL
+    repo:str=None,   # GitHub repo name (leave empty if using "owner/repo" or URL format for owner param)
+    ref:str=None,  # Git ref (branch/tag/sha) (get from URL not provided); defaults to repo's default branch
+    folder:str=None,  # Only include files under this path (get from URL not provided)
+    show_filters:bool=True,  # Include filter info in title?
+    token:str=None,  # GitHub token (uses GITHUB_TOKEN env var if None)
+    **kwargs  # Passed to `folder2ctx`
+)->Union[str,dict]:  # XML for LM context, or dict of file sizes
+    "Convert GitHub repo to XML context without cloning"
+    import tempfile, tarfile, io
+    if owner.startswith('http'):
+        parsed = parse_gh_url(owner)
+        if not parsed: raise ValueError(f"Invalid GitHub URL: {owner}")
+        owner,repo = parsed['owner'], parsed['repo']
+        ref = ref or parsed.get('ref')
+        folder = folder or parsed.get('path')
+    if repo is None: owner, repo = owner.split('/')
+    api = GhApi(token=token)
+    if ref is None: ref = api.repos.get(owner, repo).default_branch
+    data = api.repos.download_tarball_archive(owner, repo, ref)
+    title = f"GitHub repository contents from {owner}/{repo}/{ref}"
+    if folder: title += f'/{folder}'
+    if show_filters:
+        parts = [f"{k}: {', '.join(v) if isinstance(v, (list,tuple)) else v}" for k,v in kwargs.items() if v]
+        if parts: title += f" (filters applied -- {' | '.join(parts)})"
+    tf = tarfile.open(fileobj=io.BytesIO(data))
+    with tempfile.TemporaryDirectory() as tmp:
+        tf.extractall(tmp, filter='data')
+        subdir = Path(tmp) / tf.getmembers()[0].name.split('/')[0]
+        if folder: subdir = subdir/folder
+        return folder2ctx(subdir, include_base=False, title=title, readme_first=True, **kwargs)

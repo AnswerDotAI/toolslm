@@ -8,6 +8,7 @@ from fastcore.utils import *
 from httpx import get
 from fastcore.meta import delegates
 from urllib.parse import urlparse, urljoin
+from .xml import parse_gh_url
 
 # %% ../03_download.ipynb
 def clean_md(text, rm_comments=True, rm_details=True):

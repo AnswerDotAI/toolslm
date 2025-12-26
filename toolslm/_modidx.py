@@ -49,5 +49,6 @@ d = { 'settings': { 'branch': 'main',
                              'toolslm.xml.mk_doc': ('xml.html#mk_doc', 'toolslm/xml.py'),
                              'toolslm.xml.mk_doctype': ('xml.html#mk_doctype', 'toolslm/xml.py'),
                              'toolslm.xml.nb2xml': ('xml.html#nb2xml', 'toolslm/xml.py'),
+                             'toolslm.xml.parse_gh_url': ('xml.html#parse_gh_url', 'toolslm/xml.py'),
                              'toolslm.xml.read_file': ('xml.html#read_file', 'toolslm/xml.py'),
                              'toolslm.xml.repo2ctx': ('xml.html#repo2ctx', 'toolslm/xml.py')}}}
