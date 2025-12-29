@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.14
+
+### New Features
+
+- Add `sym2{file,folder,pkg}ctx` ([#57](https://github.com/AnswerDotAI/toolslm/issues/57))
+
+
 ## 0.3.13
 
 ### New Features
