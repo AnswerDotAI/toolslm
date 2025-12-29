@@ -2,10 +2,11 @@
 
 # %% auto 0
 __all__ = ['doctype', 'json_to_xml', 'get_mime_text', 'cell2out', 'cell2xml', 'nb2xml', 'mk_doctype', 'mk_doc', 'docs_xml',
-           'read_file', 'files2ctx', 'folder2ctx', 'folder2ctx_cli', 'parse_gh_url', 'repo2ctx']
+           'read_file', 'files2ctx', 'folder2ctx', 'sym2file', 'sym2folderctx', 'sym2pkgpath', 'sym2pkgctx',
+           'folder2ctx_cli', 'parse_gh_url', 'repo2ctx']
 
 # %% ../00_xml.ipynb
-import hashlib,xml.etree.ElementTree as ET
+import hashlib, inspect, xml.etree.ElementTree as ET
 from collections import namedtuple
 from ghapi.all import GhApi
 
@@ -160,6 +161,34 @@ def folder2ctx(
     suf = f"\n\n[TRUNCATED: output size {{_outsz_}} exceeded max size {max_total} bytes]"
     if max_total and len(res) > max_total: res = truncstr(res, max_total, suf=suf, sizevar='_outsz_')
     return res
+
+# %% ../00_xml.ipynb
+def sym2file(sym):
+    "Return (filepath, contents) for a symbol's source file"
+    f = Path(inspect.getfile(sym))
+    return f"- `{f}`\n\n````\n{f.read_text()}\n````"
+
+# %% ../00_xml.ipynb
+@delegates(folder2ctx)
+def sym2folderctx(
+    sym,
+    types:str|list='py',  # list or comma-separated str of ext types from: py, js, java, c, cpp, rb, r, ex, sh, web, doc, cfg
+    skip_file_re=r'^_mod',
+    **kwargs):
+    "Return folder context for a symbol's source file location"
+    return folder2ctx(Path(inspect.getfile(sym)).parent, types=types, skip_file_re=skip_file_re, **kwargs)
+
+# %% ../00_xml.ipynb
+def sym2pkgpath(sym):
+    "Get root package path for a symbol"
+    root = sym.__module__.split('.')[0]
+    return Path(sys.modules[root].__path__[0])
+
+# %% ../00_xml.ipynb
+@delegates(folder2ctx)
+def sym2pkgctx(sym, types:str|list='py', skip_file_re=r'^_mod', **kwargs):
+    "Return repo context for a symbol's root package"
+    return folder2ctx(sym2pkgpath(sym), types=types, skip_file_re=skip_file_re, **kwargs)
 
 # %% ../00_xml.ipynb
 @call_parse

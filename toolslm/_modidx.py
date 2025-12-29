@@ -51,4 +51,8 @@ d = { 'settings': { 'branch': 'main',
                              'toolslm.xml.nb2xml': ('xml.html#nb2xml', 'toolslm/xml.py'),
                              'toolslm.xml.parse_gh_url': ('xml.html#parse_gh_url', 'toolslm/xml.py'),
                              'toolslm.xml.read_file': ('xml.html#read_file', 'toolslm/xml.py'),
-                             'toolslm.xml.repo2ctx': ('xml.html#repo2ctx', 'toolslm/xml.py')}}}
+                             'toolslm.xml.repo2ctx': ('xml.html#repo2ctx', 'toolslm/xml.py'),
+                             'toolslm.xml.sym2file': ('xml.html#sym2file', 'toolslm/xml.py'),
+                             'toolslm.xml.sym2folderctx': ('xml.html#sym2folderctx', 'toolslm/xml.py'),
+                             'toolslm.xml.sym2pkgctx': ('xml.html#sym2pkgctx', 'toolslm/xml.py'),
+                             'toolslm.xml.sym2pkgpath': ('xml.html#sym2pkgpath', 'toolslm/xml.py')}}}
