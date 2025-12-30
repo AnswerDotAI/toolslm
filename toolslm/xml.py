@@ -164,7 +164,7 @@ def folder2ctx(
 
 # %% ../00_xml.ipynb
 def sym2file(sym):
-    "Return (filepath, contents) for a symbol's source file"
+    "Return md string with filepath and contents for a symbol's source file"
     f = Path(inspect.getfile(sym))
     return f"- `{f}`\n\n````\n{f.read_text()}\n````"
 
