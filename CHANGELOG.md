@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.3.16
+
+
+### Bugs Squashed
+
+- missing import ghapi ([#58](https://github.com/AnswerDotAI/toolslm/issues/58))
+
+
 ## 0.3.14
 
 ### New Features
