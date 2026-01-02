@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.17
+
+### New Features
+
+- Add `ids` to ctx funcs ([#59](https://github.com/AnswerDotAI/toolslm/issues/59))
+
+
 ## 0.3.16
 
 ### Bugs Squashed
