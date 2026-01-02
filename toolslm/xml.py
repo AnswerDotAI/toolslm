@@ -50,22 +50,23 @@ def cell2out(o):
     if hasattr(o, 'ename'): return Out(f"{o.ename}: {o.evalue}", type='error')
 
 # %% ../00_xml.ipynb
-def cell2xml(cell, out=True):
+def cell2xml(cell, out=True, ids=True):
     "Convert notebook cell to concise XML format"
     src = ''.join(getattr(cell, 'source', ''))
     f = Code if cell.cell_type=='code' else Md
-    if not out: return f(src)
+    kw = dict(id=cell.id) if ids and hasattr(cell, 'id') else {}
+    if not out: return f(src, **kw)
     parts = [Source(src)]
     out_items = L(getattr(cell,'outputs',[])).map(cell2out).filter()
     if out_items: parts.append(Outs(*out_items))
-    return f(*parts)
+    return f(*parts, **kw)
 
 # %% ../00_xml.ipynb
-def nb2xml(fname=None, nb=None, out=True):
+def nb2xml(fname=None, nb=None, out=True, ids=True):
     "Convert notebook to XML format"
     assert bool(fname)^bool(nb), "Pass either `fname` or `nb`"
     if not nb: nb = dict2obj(fname.read_json())
-    cells_xml = [to_xml(cell2xml(c, out=out), do_escape=False) for c in nb.cells if c.cell_type in ('code','markdown')]
+    cells_xml = [to_xml(cell2xml(c, out=out, ids=ids), do_escape=False) for c in nb.cells if c.cell_type in ('code','markdown')]
     return to_xml(Notebook(*cells_xml), do_escape=False)
 
 # %% ../00_xml.ipynb
@@ -115,10 +116,10 @@ def docs_xml(docs:list[str],  # The content of each document
     return pre + to_xml(Documents(*docs, **kw), do_escape=False)
 
 # %% ../00_xml.ipynb
-def read_file(fname, out=True, max_size=None):
+def read_file(fname, out=True, max_size=None, ids=True):
     "Read file content, converting notebooks to XML if needed"
     fname = Path(fname)
-    if fname.suffix == '.ipynb': res = nb2xml(fname, out=out)
+    if fname.suffix == '.ipynb': res = nb2xml(fname, out=out, ids=ids)
     else: res = fname.read_text()
     if max_size and len(res)>max_size: return f"[Skipped: {fname.name} exceeds {max_size} bytes]"
     return res
@@ -130,11 +131,12 @@ def files2ctx(
     out:bool=True, # Include notebook cell outputs?
     srcs:Optional[list]=None, # Use the labels instead of `fnames`
     max_size:int=None, # Skip files larger than this (bytes)
+    ids:bool=True,  # Include cell ids in notebooks?
     **kwargs
 )->str: # XML for LM context
     "Convert files to XML context, handling notebooks"
     fnames = [Path(o) for o in fnames]
-    contents = [read_file(o, out=out, max_size=max_size) for o in fnames]
+    contents = [read_file(o, out=out, max_size=max_size, ids=ids) for o in fnames]
     return docs_xml(contents, srcs or fnames, **kwargs)
 
 # %% ../00_xml.ipynb
@@ -149,6 +151,7 @@ def folder2ctx(
     max_total:int=10_000_000,  # Max total output size in bytes
     readme_first:bool=False,  # Prioritize README files at start of context?
     files_only:bool=False,  # Return dict of {filename: size} instead of context?
+    ids:bool=True,  # Include cell ids in notebooks?
     **kwargs
 )->Union[str,dict]:
     "Convert folder contents to XML context, handling notebooks"
@@ -157,7 +160,7 @@ def folder2ctx(
     if files_only: return {str(f.relative_to(folder)): f.stat().st_size for f in fnames}
     if readme_first: fnames = sorted(fnames, key=lambda f: (0 if 'readme' in f.name.lower() else 1, f))
     srcs = fnames if include_base else [f.relative_to(folder) for f in fnames]
-    res = files2ctx(fnames, prefix=prefix, out=out, srcs=srcs, title=title, max_size=max_size)
+    res = files2ctx(fnames, prefix=prefix, out=out, srcs=srcs, title=title, max_size=max_size, ids=ids)
     suf = f"\n\n[TRUNCATED: output size {{_outsz_}} exceeded max size {max_total} bytes]"
     if max_total and len(res) > max_total: res = truncstr(res, max_total, suf=suf, sizevar='_outsz_')
     return res
