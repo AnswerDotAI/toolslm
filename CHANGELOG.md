@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.18
+
+### New Features
+
+- Add `sigs_only` ([#60](https://github.com/AnswerDotAI/toolslm/issues/60))
+
+
 ## 0.3.17
 
 ### New Features
