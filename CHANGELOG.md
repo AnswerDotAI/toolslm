@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.3.19
+
+- line numbers support, raw cells, and expanduser for ~ paths
+
+
 ## 0.3.18
 
 ### New Features
