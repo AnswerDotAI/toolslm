@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.20
+
+### New Features
+
+- Add return docments to schema ([#61](https://github.com/AnswerDotAI/toolslm/issues/61))
+
+
 ## 0.3.19
 
 - line numbers support, raw cells, and expanduser for ~ paths
