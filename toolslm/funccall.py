@@ -141,7 +141,12 @@ def get_schema(
     assert desc, "Docstring missing!"
     d = docments(f, full=True)
     ret = d.pop('return')
-    if (ret.anno is not empty) and (ret.anno is not None): desc += f'\n\nReturns:\n- type: {_types(ret.anno)[0]}'
+    has_type = (ret.anno is not empty) and (ret.anno is not None)
+    has_doc = ret.docment
+    if has_type or has_doc:
+        type_str = f'type: {_types(ret.anno)[0]}'
+        ret_str = f'{ret.docment} ({type_str})' if has_type and has_doc else (type_str if has_type else ret.docment)
+        desc += f'\n\nReturns:\n- {ret_str}'
     return {"name": f.__name__, "description": desc, pname: schema}
 
 # %% ../01_funccall.ipynb
