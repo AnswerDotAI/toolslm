@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.21
+
+### New Features
+
+- Default `folder2ctx_cli` to current folder ([#62](https://github.com/AnswerDotAI/toolslm/issues/62))
+
+
 ## 0.3.20
 
 ### New Features
