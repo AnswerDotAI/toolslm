@@ -175,9 +175,9 @@ def files2ctx(
     return docs_xml(contents, srcs or fnames, **kwargs)
 
 # %% ../00_xml.ipynb
-@delegates(globtastic)
+@delegates(globtastic, but='func')
 def folder2ctx(
-    folder:Union[str,Path], # Folder to read
+    path:Union[str,Path], # Folder to read
     prefix:bool=False, # Include Anthropic's suggested prose intro?
     out:bool=True, # Include notebook cell outputs?
     include_base:bool=True, # Include full path in src?
@@ -191,7 +191,7 @@ def folder2ctx(
     **kwargs
 )->Union[str,dict]:
     "Convert folder contents to XML context, handling notebooks"
-    folder = Path(folder).expanduser()
+    folder = Path(path).expanduser()
     fnames = pglob(folder, **kwargs)
     if files_only: return {str(f.relative_to(folder)): f.stat().st_size for f in fnames}
     if readme_first: fnames = sorted(fnames, key=lambda f: (0 if 'readme' in f.name.lower() else 1, f))
@@ -233,12 +233,12 @@ def sym2pkgctx(sym, types:str|list='py', skip_file_re=r'^_mod', **kwargs):
 @call_parse
 @delegates(folder2ctx)
 def folder2ctx_cli(
-    folder:str, # Folder name containing files to add to context
+    path:str='.', # Folder name containing files to add to context
     out:bool=True, # Include notebook cell outputs?
     **kwargs # Passed to `folder2ctx`
 )->str: # XML for Claude context
     "CLI to convert folder contents to XML context, handling notebooks"
-    print(folder2ctx(folder, out=out, **kwargs))
+    print(folder2ctx(path, out=out, **kwargs))
 
 # %% ../00_xml.ipynb
 def parse_gh_url(url):
