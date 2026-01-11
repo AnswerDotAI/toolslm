@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.22
+
+### New Features
+
+- Add repo2ctx CLI command ([#63](https://github.com/AnswerDotAI/toolslm/issues/63))
+
+
 ## 0.3.21
 
 ### New Features
