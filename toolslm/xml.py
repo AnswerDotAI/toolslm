@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['doctype', 'json_to_xml', 'get_mime_text', 'cell2out', 'cell2xml', 'cells2xml', 'nb2xml', 'get_docstring', 'py2sigs',
            'mk_doctype', 'mk_doc', 'docs_xml', 'read_file', 'files2ctx', 'folder2ctx', 'sym2file', 'sym2folderctx',
-           'sym2pkgpath', 'sym2pkgctx', 'folder2ctx_cli', 'parse_gh_url', 'repo2ctx']
+           'sym2pkgpath', 'sym2pkgctx', 'folder2ctx_cli', 'parse_gh_url', 'repo2ctx', 'repo2ctx_cli']
 
 # %% ../00_xml.ipynb
 import hashlib, inspect, xml.etree.ElementTree as ET, ast
@@ -280,3 +280,17 @@ def repo2ctx(
         subdir = Path(tmp) / tf.getmembers()[0].name.split('/')[0]
         if folder: subdir = subdir/folder
         return folder2ctx(subdir, include_base=False, title=title, readme_first=True, **kwargs)
+
+# %% ../00_xml.ipynb
+@call_parse
+@delegates(repo2ctx, but='include_base,title,readme_first')
+def repo2ctx_cli(
+    owner:str,  # GitHub repo owner or "owner/repo" or a full github URL
+    repo:str=None,   # GitHub repo name (leave empty if using "owner/repo" or URL format)
+    ref:str=None,  # Git ref (branch/tag/sha)
+    folder:str=None,  # Only include files under this path
+    out:bool=True, # Include notebook cell outputs?
+    **kwargs # Passed to `repo2ctx`
+)->str: # XML for Claude context
+    "CLI to convert GitHub repo contents to XML context"
+    print(repo2ctx(owner, repo, ref=ref, folder=folder, out=out, **kwargs))
