@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.23
+
+### Bugs Squashed
+
+- `get_schema` fails if return docment but no type ([#64](https://github.com/AnswerDotAI/toolslm/issues/64))
+
+
 ## 0.3.22
 
 ### New Features
