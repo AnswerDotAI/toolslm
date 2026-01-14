@@ -144,7 +144,7 @@ def get_schema(
     has_type = (ret.anno is not empty) and (ret.anno is not None)
     has_doc = ret.docment
     if has_type or has_doc:
-        type_str = f'type: {_types(ret.anno)[0]}'
+        type_str = f'type: {_types(ret.anno)[0]}' if has_type else None
         ret_str = f'{ret.docment} ({type_str})' if has_type and has_doc else (type_str if has_type else ret.docment)
         desc += f'\n\nReturns:\n- {ret_str}'
     return {"name": f.__name__, "description": desc, pname: schema}
