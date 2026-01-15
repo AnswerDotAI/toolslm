@@ -70,7 +70,7 @@ def _handle_type(t, defs):
 def _is_container(t):
     "Check if type is a container (list, dict, tuple, set, Union)"
     origin = get_origin(t)
-    return origin in (list, dict, tuple, set, Union) if origin else False
+    return origin in (list, dict, tuple, set, Union, UnionType) if origin else False
 
 def _is_parameterized(t):
     "Check if type has arguments (e.g. list[int] vs list, dict[str, int] vs dict)"
