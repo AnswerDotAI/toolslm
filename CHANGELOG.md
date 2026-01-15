@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.24
+
+### New Features
+
+- Add UnionType support to `get_schema` ([#65](https://github.com/AnswerDotAI/toolslm/issues/65))
+
+
 ## 0.3.23
 
 ### Bugs Squashed
