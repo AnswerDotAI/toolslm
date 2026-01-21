@@ -11,6 +11,7 @@ from fastcore.utils import *
 from fastcore.meta import delegates
 import inspect, re, sys, ast, builtins, os, linecache
 from importlib import import_module
+
 from .xml import *
 
 # %% ../05_inspecttools.ipynb #9778fca8
@@ -23,6 +24,7 @@ def _find_frame_dict(var:str):
     raise ValueError(f"Could not find {var} in any scope")
 
 # %% ../05_inspecttools.ipynb #7fd415fa
+@llmtool
 def importmodule(
     mod: str, # The module to import (e.g. 'torch.nn.functional')
     caller_symbol:str = '__msg_id'  # The name of the special variable to find the correct caller namespace
@@ -79,6 +81,7 @@ def _src_from_lines(lines, start):
     return ''.join(lines[start:start + tree.body[0].end_lineno])
 
 # %% ../05_inspecttools.ipynb #41ecbd5c
+@llmtool
 def symsrc(
     sym: str  # Dotted symbol path (e.g `Interval` or `sympy.sets.sets.Interval`) or "_last" for previous result
 ):
@@ -109,6 +112,7 @@ def symsrc(
     raise OSError(f"Source for {name} not found")
 
 # %% ../05_inspecttools.ipynb #bbf67405
+@llmtool
 def symtype(
     syms: str  # Comma separated str list of dotted symbol paths (e.g `'Interval,a'` or `'sympy.sets.sets.Interval'`); "_last" for prev result
 ):
@@ -125,6 +129,7 @@ def symtype(
     return [f(o) for o in re.split(r'\,\s*', syms)]
 
 # %% ../05_inspecttools.ipynb #dd4279b8
+@llmtool
 def symval(
     syms: str  # Comma separated str list of dotted symbol paths (e.g `Interval` or `sympy.sets.sets.Interval`); "_last" for prev result
 ):
@@ -156,6 +161,7 @@ def symtype_val(
     return [f(o) for o in re.split(r'\,\s*', syms)]
 
 # %% ../05_inspecttools.ipynb #1cd34596
+@llmtool
 def symdir(
     sym: str,  # Dotted symbol path (e.g `Interval` or `sympy.sets.sets.Interval`) or "_last" for previous result
     exclude_private: bool=False # Filter out attrs starting with "_"
@@ -166,6 +172,7 @@ def symdir(
     return [o for o in res if o[0]!='_']
 
 # %% ../05_inspecttools.ipynb #9542de0b
+@llmtool
 def symnth(
     sym: str,  # Dotted symbol path to a dict or object with .values()
     n: int     # Index into the values (0-based)
@@ -181,6 +188,7 @@ def symnth(
     return _last
 
 # %% ../05_inspecttools.ipynb #4ac6ca2d
+@llmtool
 def symlen(
     sym: str  # Dotted symbol path or "_last" for previous result
 ):
@@ -188,6 +196,7 @@ def symlen(
     return len(resolve(sym))
 
 # %% ../05_inspecttools.ipynb #a5dfbe8f
+@llmtool
 def symslice(
     sym: str,   # Dotted symbol path or "_last" for previous result
     start: int, # Starting index for slice
@@ -198,6 +207,7 @@ def symslice(
     except Exception as e: return f'Error: {e}'
 
 # %% ../05_inspecttools.ipynb #5fca4d70
+@llmtool
 def symsearch(
     sym:str,      # Dotted symbol path or "_last" for previous result
     term:str,     # Search term (exact string or regex pattern)
@@ -210,6 +220,7 @@ def symsearch(
     else: return str([(x, i) for i, x in enumerate(resolve(sym)) if x == term])
 
 # %% ../05_inspecttools.ipynb #02c09e1a
+@llmtool
 def symset(
     val: str  # Value to assign to _ai_sym
 ):
@@ -217,6 +228,7 @@ def symset(
     _find_frame_dict('__msg_id')['_ai_sym'] = val
 
 # %% ../05_inspecttools.ipynb #72e5f0a8
+@llmtool
 @delegates(sym2folderctx)
 def symfiles_folder(
     sym:str,      # Dotted symbol path or "_last" for previous result
@@ -228,6 +240,7 @@ def symfiles_folder(
     return sym2folderctx(s, **kwargs)
 
 # %% ../05_inspecttools.ipynb #fdd0990e
+@llmtool
 @delegates(sym2pkgctx)
 def symfiles_package(
     sym:str,      # Dotted symbol path or "_last" for previous result

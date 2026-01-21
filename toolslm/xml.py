@@ -193,9 +193,10 @@ def sym2file(sym):
 @delegates(folder2ctx)
 def sym2folderctx(
     sym,
-    types:str|list='py',  # list or comma-separated str of ext types from: py, js, java, c, cpp, rb, r, ex, sh, web, doc, cfg
-    skip_file_re=r'^_mod',
-    **kwargs):
+    types:str|list='py',  # List or comma-separated str of ext types from: py, js, java, c, cpp, rb, r, ex, sh, web, doc, cfg
+    skip_file_re:str=r'^_mod', # Skip files matching regex
+    **kwargs
+):
     "Return folder context for a symbol's source file location"
     return folder2ctx(Path(inspect.getfile(sym)).parent, types=types, skip_file_re=skip_file_re, **kwargs)
 
@@ -208,7 +209,13 @@ def sym2pkgpath(sym):
 
 # %% ../00_xml.ipynb #798ca61f
 @delegates(folder2ctx)
-def sym2pkgctx(sym, types:str|list='py', skip_file_re=r'^_mod', skip_folder_re=r'^(\.|__)', **kwargs):
+def sym2pkgctx(
+    sym,
+    types:str|list='py', # List or comma-separated str of ext types from: py, js, java, c, cpp, rb, r, ex, sh, web, doc, cfg
+    skip_file_re:str=r'^_mod', # Skip files matching regex
+    skip_folder_re:str=r'^(\.|__)', # Skip folders matching regex
+    **kwargs
+):
     "Return contents of files in a symbol's root package"
     return folder2ctx(sym2pkgpath(sym), types=types, skip_file_re=skip_file_re, skip_folder_re=skip_folder_re, **kwargs)
 
