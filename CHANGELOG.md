@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.3.25
+
+### New Features
+
+- Add inspecttools module for LLM symbol inspection ([#66](https://github.com/AnswerDotAI/toolslm/issues/66))
+- Use `codesigs` for signatures ([#66](https://github.com/AnswerDotAI/toolslm/issues/66))
+
+
 ## 0.3.24
 
 ### New Features
