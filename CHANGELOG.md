@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.26
+
+### New Features
+
+- Add @llmtool decorators to inspecttools functions and improve type hints ([#67](https://github.com/AnswerDotAI/toolslm/issues/67))
+
+
 ## 0.3.25
 
 ### New Features
