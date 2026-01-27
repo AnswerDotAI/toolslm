@@ -25,7 +25,7 @@ def _types(t:type)->tuple[str,Optional[str]]:
     if t is empty: raise TypeError('Missing type')
     tmap = {int:"integer", float:"number", str:"string", bool:"boolean", list:"array", dict:"object"}
     tmap.update({k.__name__: v for k, v in tmap.items()})
-    if getattr(t, '__origin__', None) in (list,tuple):
+    if getattr(t, '__origin__', None) in (list,tuple,set):
         args = getattr(t, '__args__', None)
         item_type = "object" if not args else tmap.get(t.__args__[0].__name__, "object")
         return "array", item_type
@@ -58,9 +58,11 @@ custom_types = {Path, bytes, Decimal, UUID}
 
 def _handle_type(t, defs):
     "Handle a single type, creating nested schemas if necessary"
+    ot = ifnone(get_origin(t), t)
     if t is NoneType: return {'type': 'null'}
     if t in custom_types: return {'type':'string', 'format':t.__name__}
-    if t in (dict, list, tuple, set): return {'type': _types(t)[0]}
+    if ot is dict: return {'type': _types(t)[0]} 
+    if ot in (list, tuple, set): return {'type': _types(t)[0], 'items':{}}
     if isinstance(t, type) and not issubclass(t, (int, float, str, bool)) or inspect.isfunction(t):
         defs[t.__name__] = _get_nested_schema(t)
         return {'$ref': f'#/$defs/{t.__name__}'}
@@ -235,7 +237,7 @@ def call_func(fc_name, fc_inputs, ns, raise_on_err=True):
         if raise_on_err: raise e from None
         else: return traceback.format_exc()
 
-# %% ../01_funccall.ipynb #7ac04e80-7bb9-4b52-8285-454684605d47
+# %% ../01_funccall.ipynb #73bca085
 async def call_func_async(fc_name, fc_inputs, ns, raise_on_err=True):
     "Awaits the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     res = call_func(fc_name, fc_inputs, ns, raise_on_err=raise_on_err)
