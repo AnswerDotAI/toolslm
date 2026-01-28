@@ -24,8 +24,14 @@ Documentation = "https://AnswerDotAI.github.io/toolslm"
 [project.entry-points.nbdev]
 toolslm = "toolslm._modidx:d"
 
+[project.scripts]
+folder2ctx=toolslm.xml:folder2ctx_cli
+
 [tool.setuptools.dynamic]
 version = {attr = "toolslm.__version__"}
+
+[project.scripts]
+folder2ctx=toolslm.xml:folder2ctx_cli
 
 [tool.setuptools.packages.find]
 include = ["toolslm"]
