@@ -3,19 +3,16 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="toolslm"
+name = "toolslm"
 dynamic = ["version"]
 description = "Tools to make language models a bit easier to use"
 readme = "README.md"
-requires-python=">=3.9"
+requires-python = ">=3.9"
 license = {text = "Apache-2.0"}
 authors = [{name = "Jeremy Howard", email = "j@fast.ai"}]
 keywords = ['nbdev', 'jupyter', 'notebook', 'python']
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-]
-dependencies = ["fastcore>=1.12.4","httpx","ghapi","codesigs"]
+classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
+dependencies = ['fastcore>=1.12.4', 'httpx', 'ghapi', 'codesigs']
 
 [project.urls]
 Repository = "https://github.com/AnswerDotAI/toolslm"
@@ -24,16 +21,19 @@ Documentation = "https://AnswerDotAI.github.io/toolslm"
 [project.entry-points.nbdev]
 toolslm = "toolslm._modidx:d"
 
+[project.optional-dependencies]
+dev = ['ipython']
+
+
 [project.scripts]
 folder2ctx = "toolslm.xml:folder2ctx_cli"
+repo2ctx = "toolslm.xml:repo2ctx_cli"
+
 [tool.setuptools.dynamic]
 version = {attr = "toolslm.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["toolslm"]
-
-[project.optional-dependencies]
-dev = ["ipython"]
 
 [tool.nbdev]
 nbs_path = '.'
