@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.3.27
+
+### New Features
+
+- Add dotted name support for resolving and calling methods on objects ([#70](https://github.com/AnswerDotAI/toolslm/issues/70))
+
+### Bugs Squashed
+
+- Add 'items' field to JSON schema for Gemini compatibility ([#68](https://github.com/AnswerDotAI/toolslm/pull/68)), thanks to [@PiotrCzapla](https://github.com/PiotrCzapla)
+
+
 ## 0.3.26
 
 ### New Features
