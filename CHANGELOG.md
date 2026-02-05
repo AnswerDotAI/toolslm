@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.28
+
+### New Features
+
+- Use callable class docstring when `__call__` lacks one ([#71](https://github.com/AnswerDotAI/toolslm/issues/71))
+
+
 ## 0.3.27
 
 ### New Features
