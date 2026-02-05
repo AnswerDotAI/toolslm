@@ -141,9 +141,11 @@ def get_schema(
     "Generate JSON schema for a class, function, or method"
     if isinstance(f, dict): return f
     if hasattr(f, '__call__') and not isinstance(f, type) and not inspect.isfunction(f) and not inspect.ismethod(f):
+        orig_doc = f.__doc__
         f = f.__call__
+    else: orig_doc = None
     schema = _get_nested_schema(f, evalable=evalable, skip_hidden=skip_hidden)
-    desc = f.__doc__
+    desc = f.__doc__ or orig_doc
     assert desc, "Docstring missing!"
     d = docments(f, full=True)
     ret = d.pop('return')
