@@ -54,7 +54,7 @@ def _param(
         else: pschema["default"] = info.default
     return pschema
 
-# %% ../01_funccall.ipynb #f77bea1c
+# %% ../01_funccall.ipynb #e35b67fd
 custom_types = {Path, bytes, Decimal, UUID}
 
 def _handle_type(t, defs):
@@ -62,8 +62,7 @@ def _handle_type(t, defs):
     ot = ifnone(get_origin(t), t)
     if t is NoneType: return {'type': 'null'}
     if t in custom_types: return {'type':'string', 'format':t.__name__}
-    if ot is dict: return {'type': _types(t)[0]} 
-    if ot in (list, tuple, set): return {'type': _types(t)[0], 'items':{}}
+    if ot in (dict, list, tuple, set): return _handle_container(ot, get_args(t), defs) if get_args(t) else {'type': _types(t)[0], 'items': {}}
     if isinstance(t, type) and not issubclass(t, (int, float, str, bool)) or inspect.isfunction(t):
         defs[t.__name__] = _get_nested_schema(t)
         return {'$ref': f'#/$defs/{t.__name__}'}
