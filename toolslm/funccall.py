@@ -5,7 +5,7 @@ __all__ = ['empty', 'custom_types', 'get_schema', 'python', 'mk_ns', 'resolve_nm
            'call_func_async', 'mk_param', 'schema2sig', 'mk_tool']
 
 # %% ../01_funccall.ipynb #e5ad6b86
-import inspect, json, ast
+import asyncio, inspect, json, ast
 from collections import abc
 from fastcore.utils import *
 from fastcore.docments import docments
@@ -257,12 +257,15 @@ def call_func(fc_name, fc_inputs, ns, raise_on_err=True):
 # %% ../01_funccall.ipynb #73bca085
 async def call_func_async(fc_name, fc_inputs, ns, raise_on_err=True):
     "Awaits the function `fc_name` with the given `fc_inputs` using namespace `ns`."
-    res = call_func(fc_name, fc_inputs, ns, raise_on_err=raise_on_err)
-    if inspect.iscoroutine(res):
-        try: res = await res
-        except Exception as e:
-            if raise_on_err: raise e from None
-            else: return traceback.format_exc()
+    if not isinstance(ns, abc.Mapping): ns = mk_ns(ns)
+    func = resolve_nm(fc_name, ns)
+    if inspect.iscoroutinefunction(func):
+        res = call_func(fc_name, fc_inputs, ns, raise_on_err=raise_on_err)
+    else: res = asyncio.to_thread(call_func, fc_name, fc_inputs, ns, raise_on_err=raise_on_err)
+    try: res = await res
+    except Exception as e:
+        if raise_on_err: raise e from None
+        else: return traceback.format_exc()
     return res
 
 # %% ../01_funccall.ipynb #ede7ea66
