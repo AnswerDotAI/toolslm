@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.29
+
+### New Features
+
+- run sync tools with threads in `call_func_async` ([#73](https://github.com/AnswerDotAI/toolslm/pull/73)), thanks to [@KeremTurgutlu](https://github.com/KeremTurgutlu)
+
+
 ## 0.3.28
 
 ### New Features
