@@ -64,7 +64,7 @@ def _handle_type(t, defs):
     if t in custom_types: return {'type':'string', 'format':t.__name__}
     if ot is dict: return {'type': _types(t)[0]} 
     if ot in (list, tuple, set): return {'type': _types(t)[0], 'items':{}}
-    if isinstance(t, type) and not issubclass(t, (int, float, str, bool)) or inspect.isfunction(t):
+    if isinstance(t, type) and not issubclass(t, (int, float, str, bool)) and t.__module__ != 'builtins' or inspect.isfunction(t):
         defs[t.__name__] = _get_nested_schema(t)
         return {'$ref': f'#/$defs/{t.__name__}'}
     return {'type': _types(t)[0]}
