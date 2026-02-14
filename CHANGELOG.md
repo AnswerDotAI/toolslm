@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.3.30
+
+### New Features
+
+- Skip builtin types (e.g. object) from nested schema generation ([#77](https://github.com/AnswerDotAI/toolslm/issues/77))
+- run sync tools with threads in `call_func_async` ([#73](https://github.com/AnswerDotAI/toolslm/pull/73)), thanks to [@KeremTurgutlu](https://github.com/KeremTurgutlu)
+
+
 ## 0.3.29
 
 ### New Features
