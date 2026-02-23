@@ -27,7 +27,7 @@ def _find_frame_dict(var:str):
 @llmtool
 def importmodule(
     mod: str, # The module to import (e.g. 'torch.nn.functional')
-    caller_symbol:str = '__msg_id'  # The name of the special variable to find the correct caller namespace
+    caller_symbol:str = '__dialog_name'  # The name of the special variable to find the correct caller namespace
 ):
     """Import a module into the caller's global namespace so it's available for `symsrc`, `symval`, `symdir`, etc.
     Use this before inspecting or using symbols from modules not yet imported."""
@@ -55,7 +55,7 @@ def resolve(
     - `resolve("mylist[2]")` -> third element of mylist"""
     global _last
     if (sym := sym.strip()) == '_last': return _last
-    g = _find_frame_dict('__msg_id')
+    g = _find_frame_dict('__dialog_name')
     if match := re.match(r'^(\w+)\[(\d+)\]$', sym):
         attr, idx = match.groups()
         parts, _last = ['_last'], _last[int(idx)] if attr == '_last' else g[attr][int(idx)]
@@ -220,12 +220,11 @@ def symsearch(
     else: return str([(x, i) for i, x in enumerate(resolve(sym)) if x == term])
 
 # %% ../05_inspecttools.ipynb #02c09e1a
-@llmtool
 def symset(
     val: str  # Value to assign to _ai_sym
 ):
     "Set _ai_sym to the given value"
-    _find_frame_dict('__msg_id')['_ai_sym'] = val
+    _find_frame_dict('__dialog_name')['_ai_sym'] = val
 
 # %% ../05_inspecttools.ipynb #72e5f0a8
 @llmtool
