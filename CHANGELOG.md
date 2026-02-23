@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.31
+
+### New Features
+
+- look for `__dialog_name` ([#78](https://github.com/AnswerDotAI/toolslm/issues/78))
+
+
 ## 0.3.30
 
 ### New Features
