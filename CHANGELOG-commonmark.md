@@ -1,0 +1,362 @@
+
+
+# Release notes
+
+<!-- do not remove -->
+
+## 0.3.31
+
+### New Features
+
+- look for `__dialog_name`
+  ([\#78](https://github.com/AnswerDotAI/toolslm/issues/78))
+
+## 0.3.30
+
+### New Features
+
+- Skip builtin types (e.g. object) from nested schema generation
+  ([\#77](https://github.com/AnswerDotAI/toolslm/issues/77))
+- run sync tools with threads in `call_func_async`
+  ([\#73](https://github.com/AnswerDotAI/toolslm/pull/73)), thanks to
+  [@KeremTurgutlu](https://github.com/KeremTurgutlu)
+
+## 0.3.29
+
+### New Features
+
+- run sync tools with threads in `call_func_async`
+  ([\#73](https://github.com/AnswerDotAI/toolslm/pull/73)), thanks to
+  [@KeremTurgutlu](https://github.com/KeremTurgutlu)
+
+## 0.3.28
+
+### New Features
+
+- Use callable class docstring when `__call__` lacks one
+  ([\#71](https://github.com/AnswerDotAI/toolslm/issues/71))
+
+## 0.3.27
+
+### New Features
+
+- Add dotted name support for resolving and calling methods on objects
+  ([\#70](https://github.com/AnswerDotAI/toolslm/issues/70))
+
+### Bugs Squashed
+
+- Add ‘items’ field to JSON schema for Gemini compatibility
+  ([\#68](https://github.com/AnswerDotAI/toolslm/pull/68)), thanks to
+  [@PiotrCzapla](https://github.com/PiotrCzapla)
+
+## 0.3.26
+
+### New Features
+
+- Add @llmtool decorators to inspecttools functions and improve type
+  hints ([\#67](https://github.com/AnswerDotAI/toolslm/issues/67))
+
+## 0.3.25
+
+### New Features
+
+- Add inspecttools module for LLM symbol inspection
+  ([\#66](https://github.com/AnswerDotAI/toolslm/issues/66))
+- Use `codesigs` for signatures
+  ([\#66](https://github.com/AnswerDotAI/toolslm/issues/66))
+
+## 0.3.24
+
+### New Features
+
+- Add UnionType support to `get_schema`
+  ([\#65](https://github.com/AnswerDotAI/toolslm/issues/65))
+
+## 0.3.23
+
+### Bugs Squashed
+
+- `get_schema` fails if return docment but no type
+  ([\#64](https://github.com/AnswerDotAI/toolslm/issues/64))
+
+## 0.3.22
+
+### New Features
+
+- Add repo2ctx CLI command
+  ([\#63](https://github.com/AnswerDotAI/toolslm/issues/63))
+
+## 0.3.21
+
+### New Features
+
+- Default `folder2ctx_cli` to current folder
+  ([\#62](https://github.com/AnswerDotAI/toolslm/issues/62))
+
+## 0.3.20
+
+### New Features
+
+- Add return docments to schema
+  ([\#61](https://github.com/AnswerDotAI/toolslm/issues/61))
+
+## 0.3.19
+
+- line numbers support, raw cells, and expanduser for ~ paths
+
+## 0.3.18
+
+### New Features
+
+- Add `sigs_only`
+  ([\#60](https://github.com/AnswerDotAI/toolslm/issues/60))
+
+## 0.3.17
+
+### New Features
+
+- Add `ids` to ctx funcs
+  ([\#59](https://github.com/AnswerDotAI/toolslm/issues/59))
+
+## 0.3.16
+
+### Bugs Squashed
+
+- missing import ghapi
+  ([\#58](https://github.com/AnswerDotAI/toolslm/issues/58))
+
+## 0.3.14
+
+### New Features
+
+- Add `sym2{file,folder,pkg}ctx`
+  ([\#57](https://github.com/AnswerDotAI/toolslm/issues/57))
+
+## 0.3.13
+
+### New Features
+
+- Much improved `repo2ctx`
+  ([\#56](https://github.com/AnswerDotAI/toolslm/issues/56))
+
+## 0.3.11
+
+### New Features
+
+- Add `skip_hidden`
+  ([\#55](https://github.com/AnswerDotAI/toolslm/issues/55))
+
+## 0.3.10
+
+### New Features
+
+- Add `evalable` to `get_schema`
+  ([\#54](https://github.com/AnswerDotAI/toolslm/issues/54))
+
+## 0.3.9
+
+### New Features
+
+- Add `max_size` and `title` to `folder2ctx` et al
+  ([\#53](https://github.com/AnswerDotAI/toolslm/issues/53))
+
+## 0.3.8
+
+### New Features
+
+- Add `repo2ctx`
+  ([\#52](https://github.com/AnswerDotAI/toolslm/issues/52))
+
+## 0.3.7
+
+### New Features
+
+- Add `folder2ctx` `out` param
+  ([\#51](https://github.com/AnswerDotAI/toolslm/issues/51))
+
+## 0.3.6
+
+### New Features
+
+- Automatically handle `{Path, bytes, Decimal, UUID}` in schemas
+  ([\#49](https://github.com/AnswerDotAI/toolslm/issues/49))
+- Add schema to function capabilities
+  ([\#47](https://github.com/AnswerDotAI/toolslm/issues/47))
+
+### Bugs Squashed
+
+- fix line misalignment when code block is between headings
+  ([\#40](https://github.com/AnswerDotAI/toolslm/pull/40)), thanks to
+  [@jackhogan](https://github.com/jackhogan)
+
+## 0.3.4
+
+### New Features
+
+- Support notebook context
+  ([\#41](https://github.com/AnswerDotAI/toolslm/issues/41))
+- Only add title when needed to schemas
+  ([\#39](https://github.com/AnswerDotAI/toolslm/issues/39))
+
+## 0.3.2
+
+### Breaking changes
+
+- New combined API
+  ([\#38](https://github.com/AnswerDotAI/toolslm/issues/38))
+
+## 0.3.1
+
+### New Features
+
+- Add `rm_fenced`
+  ([\#37](https://github.com/AnswerDotAI/toolslm/issues/37))
+
+### Bugs Squashed
+
+- Add edge case tests and fix them
+  ([\#36](https://github.com/AnswerDotAI/toolslm/issues/36))
+
+## 0.3.0
+
+### Breaking changes
+
+- Remove object enumeration of tools
+  ([\#35](https://github.com/AnswerDotAI/toolslm/issues/35))
+
+## 0.2.3
+
+### New Features
+
+- Handle list and dict args to `mk_ns`
+  ([\#34](https://github.com/AnswerDotAI/toolslm/issues/34))
+
+## 0.2.2
+
+### New Features
+
+- Auto clean up bad param names in `call_func`
+  ([\#33](https://github.com/AnswerDotAI/toolslm/issues/33))
+
+### Bugs Squashed
+
+- python() function can’t be used as a tool
+  ([\#32](https://github.com/AnswerDotAI/toolslm/issues/32))
+
+## 0.2.1
+
+### New Features
+
+- Optionally dont raise error on `call_func`
+  ([\#31](https://github.com/AnswerDotAI/toolslm/pull/31)), thanks to
+  [@erikgaas](https://github.com/erikgaas)
+- dict support in `get_schema`
+  ([\#30](https://github.com/AnswerDotAI/toolslm/issues/30))
+
+## 0.2.0
+
+### Breaking changes
+
+- Optional libs (http2text, beautifulsoup, llms_txt) are no longer
+  automatically installed
+
+### New Features
+
+- Lazily load optional modules
+  ([\#29](https://github.com/AnswerDotAI/toolslm/issues/29))
+
+## 0.1.3
+
+### New Features
+
+- Pass glb,loc to python
+  ([\#28](https://github.com/AnswerDotAI/toolslm/issues/28))
+
+## 0.1.2
+
+### New Features
+
+- Adds `call_func_async`
+  ([\#27](https://github.com/AnswerDotAI/toolslm/pull/27)), thanks to
+  [@mikonapoli](https://github.com/mikonapoli)
+- Add arg ignore links
+  ([\#26](https://github.com/AnswerDotAI/toolslm/pull/26)), thanks to
+  [@Isaac-Flath](https://github.com/Isaac-Flath)
+
+## 0.1.1
+
+### New Features
+
+- Add arg ignore links
+  ([\#26](https://github.com/AnswerDotAI/toolslm/pull/26)), thanks to
+  [@Isaac-Flath](https://github.com/Isaac-Flath)
+
+### Bugs Squashed
+
+- fix: prevent markdown heading detection inside code blocks
+  ([\#25](https://github.com/AnswerDotAI/toolslm/pull/25)), thanks to
+  [@franckalbinet](https://github.com/franckalbinet)
+- Fix markdown hierarchy parsing for arbitrary header levels
+  ([\#22](https://github.com/AnswerDotAI/toolslm/pull/22)), thanks to
+  [@erikgaas](https://github.com/erikgaas)
+
+## 0.1.0
+
+### Breaking changes
+
+- Replace `source` with `src` in context generation
+  ([\#17](https://github.com/AnswerDotAI/toolslm/issues/17))
+
+## 0.0.8
+
+### New Features
+
+- Escape and print context in `folder2ctx` et al
+  ([\#16](https://github.com/AnswerDotAI/toolslm/issues/16))
+
+## 0.0.7
+
+### New Features
+
+- Add `dict2obj` to `md_hier` funcs
+  ([\#15](https://github.com/AnswerDotAI/toolslm/issues/15))
+- Migrate call_func from claudette to toolslm
+  ([\#14](https://github.com/AnswerDotAI/toolslm/pull/14)), thanks to
+  [@ncoop57](https://github.com/ncoop57)
+- Allow for getting schemas from nested structures
+  ([\#11](https://github.com/AnswerDotAI/toolslm/pull/11)), thanks to
+  [@ncoop57](https://github.com/ncoop57)
+- Allow for `sel` to select and wrap multiple element results
+  ([\#10](https://github.com/AnswerDotAI/toolslm/pull/10)), thanks to
+  [@Isaac-Flath](https://github.com/Isaac-Flath)
+
+### Bugs Squashed
+
+- Using `get_schema` on class method results in type missing error
+  ([\#12](https://github.com/AnswerDotAI/toolslm/issues/12))
+
+## 0.0.6
+
+### New Features
+
+- Add `read_docs` and `find_docs`
+  ([\#8](https://github.com/AnswerDotAI/toolslm/issues/8))
+
+## 0.0.5
+
+### Bugs Squashed
+
+- XML tools assume all files have content
+  ([\#3](https://github.com/AnswerDotAI/toolslm/issues/3))
+
+## 0.0.4
+
+- Minor updates
+
+## 0.0.2
+
+- Rename project
+
+## 0.0.1
+
+- Initial alpha release
