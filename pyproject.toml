@@ -39,3 +39,5 @@ include = ["toolslm"]
 nbs_path = '.'
 jupyter_hooks = true
 custom_sidebar = false
+allowed_cell_metadata_keys = ['solveit_ai']
+

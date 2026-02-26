@@ -259,10 +259,9 @@ async def call_func_async(fc_name, fc_inputs, ns, raise_on_err=True):
     "Awaits the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     if not isinstance(ns, abc.Mapping): ns = mk_ns(ns)
     func = resolve_nm(fc_name, ns)
-    if inspect.iscoroutinefunction(func):
+    try:
         res = call_func(fc_name, fc_inputs, ns, raise_on_err=raise_on_err)
-    else: res = asyncio.to_thread(call_func, fc_name, fc_inputs, ns, raise_on_err=raise_on_err)
-    try: res = await res
+        res = await maybe_await(res)
     except Exception as e:
         if raise_on_err: raise e from None
         else: return traceback.format_exc()
