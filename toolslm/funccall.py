@@ -26,7 +26,9 @@ def _types(t:type)->tuple[str,Optional[str]]:
     if t is empty: raise TypeError('Missing type')
     tmap = {int:"integer", float:"number", str:"string", bool:"boolean", list:"array", dict:"object"}
     tmap.update({k.__name__: v for k, v in tmap.items()})
-    if getattr(t, '__origin__', None) in (list,tuple,set):
+    origin = getattr(t, '__origin__', None)
+    if origin is tuple: return "array", None
+    if origin in (list,set):
         args = getattr(t, '__args__', None)
         item_type = "object" if not args else tmap.get(t.__args__[0].__name__, "object")
         return "array", item_type
@@ -36,6 +38,7 @@ def _types(t:type)->tuple[str,Optional[str]]:
     elif get_origin(t): return tmap.get(get_origin(t).__name__, "object"), None
     # if t is the type itself like int, use the __name__ representation as the key
     else: return tmap.get(t.__name__, "object"), None
+
 
 # %% ../01_funccall.ipynb #4d5dc245
 def _param(
@@ -62,8 +65,15 @@ def _handle_type(t, defs):
     ot = ifnone(get_origin(t), t)
     if t is NoneType: return {'type': 'null'}
     if t in custom_types: return {'type':'string', 'format':t.__name__}
-    if ot is dict: return {'type': _types(t)[0]} 
-    if ot in (list, tuple, set): return {'type': _types(t)[0], 'items':{}}
+    if ot is dict: return {'type': _types(t)[0]}
+    if ot is tuple:
+        args = get_args(t)
+        if not args: return {'type': 'array', 'items': {}}
+        if args[-1] is Ellipsis: return {'type': 'array', 'items': _handle_type(args[0], defs)}
+        return {'type': 'array', 'prefixItems': [_handle_type(a, defs) for a in args]}
+    if ot in (list, set):
+        args = get_args(t)
+        return {'type': _types(t)[0], 'items': _handle_type(args[0], defs) if args else {}}
     if isinstance(t, type) and not issubclass(t, (int, float, str, bool)) and t.__module__ != 'builtins' or inspect.isfunction(t):
         defs[t.__name__] = _get_nested_schema(t)
         return {'$ref': f'#/$defs/{t.__name__}'}
@@ -80,25 +90,23 @@ def _is_parameterized(t):
     return _is_container(t) and (get_args(t) != ())
 
 # %% ../01_funccall.ipynb #c1153f02
-def _handle_container(origin, args, defs):
+def _handle_container(t, defs):
     "Handle container types like dict, list, tuple, set, and Union"
+    origin, args = get_origin(t), get_args(t)
     if origin is Union or origin is UnionType:
         return {"anyOf": [_handle_type(arg, defs) for arg in args]}
+    if origin is tuple: return _handle_type(t, defs)
     if origin is dict:
         value_type = args[1].__args__[0] if hasattr(args[1], '__args__') else args[1]
-        return {
-            'type': 'object',
-            'additionalProperties': (
-                {'type': 'array', 'items': _handle_type(value_type, defs)}
-                if hasattr(args[1], '__origin__') else _handle_type(args[1], defs)
-            )
-        }
-    elif origin in (list, tuple, set):
+        addpr = {'type': 'array', 'items': _handle_type(value_type, defs)
+            } if hasattr(args[1], '__origin__') else _handle_type(args[1], defs)
+        return { 'type': 'object', 'additionalProperties': addpr }
+    elif origin in (list, set):
         schema = {'type': 'array', 'items': _handle_type(args[0], defs)}
-        if origin is set:
-            schema['uniqueItems'] = True
+        if origin is set: schema['uniqueItems'] = True
         return schema
     return None
+
 
 # %% ../01_funccall.ipynb #e0840bf5
 def _process_property(name, obj, props, req, defs, evalable=False):
@@ -106,12 +114,9 @@ def _process_property(name, obj, props, req, defs, evalable=False):
     p = _param(name, obj, evalable=evalable)
     props[name] = p
     if obj.default is empty: req[name] = True
-
     if _is_container(obj.anno) and _is_parameterized(obj.anno):
-        p.update(_handle_container(get_origin(obj.anno), get_args(obj.anno), defs))        
-    else:
-        # Non-container type or container without arguments
-        p.update(_handle_type(obj.anno, defs))
+        p.update(_handle_container(obj.anno, defs))
+    else: p.update(_handle_type(obj.anno, defs))
 
 # %% ../01_funccall.ipynb #38b0f97e
 def _get_nested_schema(obj, evalable=False, skip_hidden=False):
