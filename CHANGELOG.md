@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.32
+
+### New Features
+
+- Add proper JSON Schema tuple support with prefixItems, ellipsis, and simplified container handling ([#79](https://github.com/AnswerDotAI/toolslm/issues/79))
+
+
 ## 0.3.31
 
 ### New Features
