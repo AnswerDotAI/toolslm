@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.33
+
+### Bugs Squashed
+
+- fix: remove stale type key from union schemas ([#80](https://github.com/AnswerDotAI/toolslm/pull/80)), thanks to [@thechandru](https://github.com/thechandru)
+
+
 ## 0.3.32
 
 ### New Features
