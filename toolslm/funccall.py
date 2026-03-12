@@ -117,6 +117,7 @@ def _process_property(name, obj, props, req, defs, evalable=False):
     if _is_container(obj.anno) and _is_parameterized(obj.anno):
         p.update(_handle_container(obj.anno, defs))
     else: p.update(_handle_type(obj.anno, defs))
+    if 'anyOf' in p: p.pop('type', None)
 
 # %% ../01_funccall.ipynb #38b0f97e
 def _get_nested_schema(obj, evalable=False, skip_hidden=False):
