@@ -5,11 +5,11 @@ __all__ = ['empty', 'custom_types', 'get_schema', 'python', 'mk_ns', 'resolve_nm
            'call_func_async', 'mk_param', 'schema2sig', 'mk_tool']
 
 # %% ../01_funccall.ipynb #e5ad6b86
-import asyncio, inspect, json, ast
+import inspect, ast, keyword
 from collections import abc
 from fastcore.utils import *
 from fastcore.docments import docments
-from typing import get_origin, get_args, Dict, List, Optional, Tuple, Union, Any
+from typing import get_origin, get_args, Optional, Union, Any
 from types import UnionType
 from typing import get_type_hints
 from inspect import Parameter, Signature
@@ -21,7 +21,7 @@ from functools import reduce
 empty = inspect.Parameter.empty
 
 # %% ../01_funccall.ipynb #e7bf4025
-def _types(t:type)->tuple[str,Optional[str]]:
+def _types(t:type)->tuple[str, str | None]:
     "Tuple of json schema type name and (if appropriate) array item name."
     if t is empty: raise TypeError('Missing type')
     tmap = {int:"integer", float:"number", str:"string", bool:"boolean", list:"array", dict:"object"}
@@ -93,8 +93,7 @@ def _is_parameterized(t):
 def _handle_container(t, defs):
     "Handle container types like dict, list, tuple, set, and Union"
     origin, args = get_origin(t), get_args(t)
-    if origin is Union or origin is UnionType:
-        return {"anyOf": [_handle_type(arg, defs) for arg in args]}
+    if origin in (Union, UnionType): return {"anyOf": [_handle_type(arg, defs) for arg in args]}
     if origin is tuple: return _handle_type(t, defs)
     if origin is dict:
         value_type = args[1].__args__[0] if hasattr(args[1], '__args__') else args[1]
@@ -114,8 +113,7 @@ def _process_property(name, obj, props, req, defs, evalable=False):
     p = _param(name, obj, evalable=evalable)
     props[name] = p
     if obj.default is empty: req[name] = True
-    if _is_container(obj.anno) and _is_parameterized(obj.anno):
-        p.update(_handle_container(obj.anno, defs))
+    if _is_container(obj.anno) and _is_parameterized(obj.anno): p.update(_handle_container(obj.anno, defs))
     else: p.update(_handle_type(obj.anno, defs))
     if 'anyOf' in p: p.pop('type', None)
 
@@ -164,7 +162,7 @@ def get_schema(
     return {"name": name or f.__name__, "description": desc, pname: schema}
 
 # %% ../01_funccall.ipynb #873000d7
-import ast, time, signal, traceback
+import ast, signal, traceback
 from fastcore.utils import *
 
 # %% ../01_funccall.ipynb #4703296a
@@ -248,12 +246,33 @@ def get_schema_nm(nm:str, ns, dot2dash=False, **kwargs):
     name = nm.replace('.', '-') if dot2dash else nm
     return get_schema(resolve_nm(nm, ns), name=name, **kwargs)
 
+# %% ../01_funccall.ipynb #f1e7f8b4
+def _norm_nm(nm, repl=''): return re.sub(r'\W', repl, nm)
+
+# %% ../01_funccall.ipynb #2fca0f67
+def _py_nm(nm):
+    nm = _norm_nm(nm, '_')
+    if nm and nm[0].isdigit(): nm = f'_{nm}'
+    if keyword.iskeyword(nm): nm = f'{nm}_'
+    return nm
+
+# %% ../01_funccall.ipynb #1625929e
+def _nm_map(nms):
+    py2orig = {}
+    for orig in nms:
+        pynm = _py_nm(orig)
+        prev = py2orig.get(pynm)
+        if prev is not None and prev != orig:
+            raise ValueError(f'Name collision after sanitizing: {prev!r} and {orig!r} -> {pynm!r}')
+        py2orig[pynm] = orig
+    return py2orig
+
 # %% ../01_funccall.ipynb #47b49644
 def call_func(fc_name, fc_inputs, ns, raise_on_err=True):
     "Call the function `fc_name` with the given `fc_inputs` using namespace `ns`."
     if not isinstance(ns, abc.Mapping): ns = mk_ns(ns)
     func = resolve_nm(fc_name, ns)
-    inps = {re.sub(r'\W', '', k):v for k,v in fc_inputs.items()}
+    inps = {_norm_nm(k):v for k,v in fc_inputs.items()}
     inps = _coerce_inputs(func, inps)
     try: return func(**inps)
     except Exception as e:
@@ -274,31 +293,34 @@ async def call_func_async(fc_name, fc_inputs, ns, raise_on_err=True):
     return res
 
 # %% ../01_funccall.ipynb #ede7ea66
-def mk_param(nm, props, req):
-    "Create a `Parameter` for `nm` with schema `props`"
-    kind = Parameter.POSITIONAL_OR_KEYWORD if nm in req else Parameter.KEYWORD_ONLY
-    default = Parameter.empty if nm in req else props.get('default')    
+def mk_param(orig, props, req, pynm=None):
+    "Create a `Parameter` for `orig` with schema `props`"
+    pynm = ifnone(pynm, orig)
+    kind = Parameter.POSITIONAL_OR_KEYWORD if orig in req else Parameter.KEYWORD_ONLY
+    default = Parameter.empty if orig in req else props.get('default')
     if props.get('type') == 'array' and 'items' in props:
         item_type = type_map.get(props['items'].get('type'), Any)
         anno = list[item_type]
     else: anno = type_map.get(props.get('type'), Any)
-    return Parameter(nm, kind, default=default, annotation=anno)
+    return Parameter(pynm, kind, default=default, annotation=anno)
 
 # %% ../01_funccall.ipynb #a8befff6
 def schema2sig(tool):
     "Convert json schema `tool` to a `Signature`"
     props, req = tool.inputSchema['properties'], tool.inputSchema.get('required', [])
-    params = sorted([mk_param(k, v, req) for k, v in props.items()], key=lambda p: p.kind)
+    py2orig = _nm_map(props)
+    params = sorted([mk_param(orig, props[orig], req, pynm) for pynm, orig in py2orig.items()], key=lambda p: p.kind)
     return Signature(params)
 
 # %% ../01_funccall.ipynb #bb16561a
 def mk_tool(dispfn, tool):
     "Create a callable function from a JSON schema tool definition"
     sig = schema2sig(tool)
-    props = tool.inputSchema['properties']
+    py2orig = _nm_map(tool.inputSchema['properties'])
     def fn(*args, **kwargs):
         bound = sig.bind(*args, **kwargs)
-        return dispfn(tool.name, **bound.arguments)
+        kwargs = {py2orig.get(k, k):v for k,v in bound.arguments.items()}
+        return dispfn(tool.name, **kwargs)
     fn.__doc__ = tool.description
     fn.__signature__ = sig
     fn.__name__ = fn.__qualname__ = tool.name
