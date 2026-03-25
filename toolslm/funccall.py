@@ -252,6 +252,7 @@ def _norm_nm(nm, repl=''): return re.sub(r'\W', repl, nm)
 # %% ../01_funccall.ipynb #2fca0f67
 def _py_nm(nm):
     nm = _norm_nm(nm, '_')
+    if not nm: return '_'
     if nm and nm[0].isdigit(): nm = f'_{nm}'
     if keyword.iskeyword(nm): nm = f'{nm}_'
     return nm
