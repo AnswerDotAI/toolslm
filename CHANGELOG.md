@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.34
+
+### New Features
+
+- Add Python identifier sanitization helpers ([#81](https://github.com/AnswerDotAI/toolslm/pull/81)), thanks to [@ncoop57](https://github.com/ncoop57)
+
+
 ## 0.3.33
 
 ### Bugs Squashed
