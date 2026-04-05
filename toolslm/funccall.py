@@ -17,6 +17,7 @@ from decimal import Decimal
 from uuid import UUID
 from functools import reduce
 
+
 # %% ../01_funccall.ipynb #a9f43047
 empty = inspect.Parameter.empty
 
@@ -89,19 +90,22 @@ def _is_parameterized(t):
     "Check if type has arguments (e.g. list[int] vs list, dict[str, int] vs dict)"
     return _is_container(t) and (get_args(t) != ())
 
+# %% ../01_funccall.ipynb #126cf9bb500f497faf848603b5df310f
+def _schema_for_type(t, defs):
+    "Return the most precise schema available for `t`"
+    if _is_container(t) and _is_parameterized(t): return _handle_container(t, defs)
+    return _handle_type(t, defs)
+
+
 # %% ../01_funccall.ipynb #c1153f02
 def _handle_container(t, defs):
     "Handle container types like dict, list, tuple, set, and Union"
     origin, args = get_origin(t), get_args(t)
-    if origin in (Union, UnionType): return {"anyOf": [_handle_type(arg, defs) for arg in args]}
+    if origin in (Union, UnionType): return {"anyOf": [_schema_for_type(arg, defs) for arg in args]}
     if origin is tuple: return _handle_type(t, defs)
-    if origin is dict:
-        value_type = args[1].__args__[0] if hasattr(args[1], '__args__') else args[1]
-        addpr = {'type': 'array', 'items': _handle_type(value_type, defs)
-            } if hasattr(args[1], '__origin__') else _handle_type(args[1], defs)
-        return { 'type': 'object', 'additionalProperties': addpr }
+    if origin is dict: return {'type': 'object', 'additionalProperties': _schema_for_type(args[1], defs)}
     elif origin in (list, set):
-        schema = {'type': 'array', 'items': _handle_type(args[0], defs)}
+        schema = {'type': 'array', 'items': _schema_for_type(args[0], defs)}
         if origin is set: schema['uniqueItems'] = True
         return schema
     return None
@@ -113,9 +117,9 @@ def _process_property(name, obj, props, req, defs, evalable=False):
     p = _param(name, obj, evalable=evalable)
     props[name] = p
     if obj.default is empty: req[name] = True
-    if _is_container(obj.anno) and _is_parameterized(obj.anno): p.update(_handle_container(obj.anno, defs))
-    else: p.update(_handle_type(obj.anno, defs))
+    p.update(_schema_for_type(obj.anno, defs))
     if 'anyOf' in p: p.pop('type', None)
+
 
 # %% ../01_funccall.ipynb #38b0f97e
 def _get_nested_schema(obj, evalable=False, skip_hidden=False):
@@ -133,6 +137,7 @@ def _get_nested_schema(obj, evalable=False, skip_hidden=False):
     if req: schema['required'] = list(req)
     if defs: schema['$defs'] = defs
     return schema
+
 
 # %% ../01_funccall.ipynb #748da965
 def get_schema(
@@ -160,6 +165,7 @@ def get_schema(
         ret_str = f'{ret.docment} ({type_str})' if has_type and has_doc else (type_str if has_type else ret.docment)
         desc += f'\n\nReturns:\n- {ret_str}'
     return {"name": name or f.__name__, "description": desc, pname: schema}
+
 
 # %% ../01_funccall.ipynb #873000d7
 import ast, signal, traceback
