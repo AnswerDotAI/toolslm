@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.3.35
+
+### New Features
+
+- Refactor type handling: replace `_types`/`_handle_container`/`_schema_for_type` with unified `_type_str`/`_handle_type`, expose `type_map`, and add set/Union/dict support ([#83](https://github.com/AnswerDotAI/toolslm/issues/83))
+- Unify container and type schema dispatch ([#82](https://github.com/AnswerDotAI/toolslm/issues/82))
+
+
 ## 0.3.34
 
 ### New Features
