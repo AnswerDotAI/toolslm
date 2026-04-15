@@ -58,7 +58,9 @@ def _handle_type(t, defs):
         args = get_args(t)
         if not args: return {'type': 'array', 'items': {}}
         if args[-1] is Ellipsis: return {'type': 'array', 'items': _handle_type(args[0], defs)}
-        return {'type': 'array', 'prefixItems': [_handle_type(a, defs) for a in args]}
+        prefix = [_handle_type(a, defs) for a in args]
+        items = prefix[0] if all(p == prefix[0] for p in prefix) else {'anyOf': prefix}
+        return {'type': 'array', 'prefixItems': prefix, 'items': items, 'minItems': len(args), 'maxItems': len(args)}
     if ot in (list, set):
         args = get_args(t)
         schema = {'type': 'array', 'items': _handle_type(args[0], defs) if args else {}}
