@@ -34,6 +34,7 @@ def importmodule(
     g = _find_frame_dict(caller_symbol)
     import_module(mod)
     g[mod.split('.')[0]] = import_module(mod.split('.')[0])
+    return True
 
 # %% ../05_inspecttools.ipynb #e40f68c9
 class SymbolNotFound(Exception):
