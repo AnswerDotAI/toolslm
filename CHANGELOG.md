@@ -6,8 +6,8 @@
 
 ### New Features
 
+- Support tuple schema generation for OpenAI/Gemini compatibility ([#85](https://github.com/AnswerDotAI/toolslm/pull/85)), thanks to [@jackhogan](https://github.com/jackhogan)
 - Make symsrc easier to use in pyrun. ([#84](https://github.com/AnswerDotAI/toolslm/pull/84)), thanks to [@PiotrCzapla](https://github.com/PiotrCzapla)
-- Support tuple schema generation for OpenAI/Gemini compatibility
 
 
 ## 0.3.35
