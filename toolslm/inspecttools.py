@@ -54,6 +54,7 @@ def resolve(
     - `resolve("sympy.sets.sets.Interval")` -> `<class 'sympy.sets.sets.Interval'>`
     - `resolve("mylist[2]")` -> third element of mylist"""
     global _last
+    if not isinstance(sym, str): return (_last := sym)
     if (sym := sym.strip()) == '_last': return _last
     g = _find_frame_dict('__dialog_name')
     if match := re.match(r'^(\w+)\[(\d+)\]$', sym):
@@ -99,7 +100,7 @@ def symsrc(
     elif hasattr(obj, '__module__') and not inspect.ismodule(obj): obj = obj.__class__
     try: fname = inspect.getfile(obj)
     except (OSError, TypeError): fname = "<session>"
-    try: return f"File: {fname}\n\n{inspect.getsource(obj)}"
+    try: return f"# File: {fname}\n\n{inspect.getsource(obj)}"
     except (OSError, TypeError): pass
     name = getattr(obj, '__name__', None)
     if not name: raise OSError(f"Cannot get source for {sym}")
@@ -108,7 +109,7 @@ def symsrc(
         src = ''.join(lines)
         if match := re.search(pat, src, re.MULTILINE):
             start = src[:match.start()].count('\n')
-            if extracted := _src_from_lines(lines, start): return f"File: {fname}\n\n{extracted}"
+            if extracted := _src_from_lines(lines, start): return f"# File: {fname}\n\n{extracted}"
     raise OSError(f"Source for {name} not found")
 
 # %% ../05_inspecttools.ipynb #bbf67405
