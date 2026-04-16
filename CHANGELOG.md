@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.3.36
+
+### New Features
+
+- Make symsrc easier to use in pyrun. ([#84](https://github.com/AnswerDotAI/toolslm/pull/84)), thanks to [@PiotrCzapla](https://github.com/PiotrCzapla)
+- Support tuple schema generation for OpenAI/Gemini compatibility
+
+
 ## 0.3.35
 
 ### New Features
