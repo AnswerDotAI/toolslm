@@ -36,7 +36,7 @@ version = {attr = "toolslm.__version__"}
 include = ["toolslm"]
 
 [tool.nbdev]
-allowed_metadata_keys = ['solveit_dialog_mode', 'solveit_ver']
+allowed_metadata_keys = ['solveit']
 nbs_path = '.'
 jupyter_hooks = true
 custom_sidebar = false
