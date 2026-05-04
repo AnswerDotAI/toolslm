@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.3.37
+
+### New Features
+
+- Coerce LLM container input mistakes in `call_func` ([#86](https://github.com/AnswerDotAI/toolslm/issues/86))
+- Support tuple schema generation for OpenAI/Gemini compatibility ([#85](https://github.com/AnswerDotAI/toolslm/pull/85)), thanks to [@jackhogan](https://github.com/jackhogan)
+
+
 ## 0.3.36
 
 ### New Features
