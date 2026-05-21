@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.38
+
+### New Features
+
+- Default unspecialised list/set schemas to string items for LLM compatibility ([#87](https://github.com/AnswerDotAI/toolslm/issues/87))
+
+
 ## 0.3.37
 
 ### New Features
