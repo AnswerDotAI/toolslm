@@ -65,7 +65,7 @@ def _handle_type(t, defs):
         return {'type': 'array', 'prefixItems': prefix, 'items': items, 'minItems': len(args), 'maxItems': len(args)}
     if ot in (list, set):
         args = get_args(t)
-        schema = {'type': 'array', 'items': _handle_type(args[0], defs) if args else {}}
+        schema = {'type': 'array', 'items': _handle_type(args[0], defs) if args else {'type': 'string'}}
         if ot is set: schema['uniqueItems'] = True
         return schema
     if isinstance(t, type) and not issubclass(t, (int, float, str, bool)) and t.__module__ != 'builtins' or inspect.isfunction(t):
