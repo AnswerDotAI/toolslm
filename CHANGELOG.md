@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.39
+
+### New Features
+
+- Refactor `_find_frame_dict` to search caller frame and fall back to `__main__` globals ([#90](https://github.com/AnswerDotAI/toolslm/issues/90))
+
+
 ## 0.3.38
 
 ### New Features
