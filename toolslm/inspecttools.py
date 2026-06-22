@@ -12,18 +12,23 @@ __all__ = ['importmodule', 'SymbolNotFound', 'resolve', 'symsrc', 'symtype', 'sy
 from fastcore.utils import *
 from fastcore.meta import delegates
 import inspect, re, sys, ast, builtins, os, linecache
+from inspect import currentframe,Parameter,signature
 from importlib import import_module
 
 from .xml import *
 
 # %% ../05_inspecttools.ipynb #9778fca8
-def _find_frame_dict(var:str):
-    "Find the dict (globals or locals) containing var"
-    frame = inspect.currentframe().f_back
+def _find_frame_dict(sentinel:str):
+    "Find the globals dict containing sentinel, falling back to __main__"
+    frame = currentframe().f_back.f_back
+    if not sentinel:
+        if m := sys.modules.get('__main__'): return m.__dict__
+        return frame.f_globals
     while frame:
-        if var in frame.f_globals: return frame.f_globals
+        if sentinel in frame.f_globals: return frame.f_globals
         frame = frame.f_back
-    raise ValueError(f"Could not find {var} in any scope")
+    if m := sys.modules.get('__main__'): return m.__dict__
+    return globals()
 
 # %% ../05_inspecttools.ipynb #7fd415fa
 @llmtool
