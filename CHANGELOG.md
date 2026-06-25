@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.3.40
+
+- rename python to minipy
+
+
 ## 0.3.39
 
 ### New Features
