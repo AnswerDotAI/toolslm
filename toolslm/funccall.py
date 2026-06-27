@@ -4,7 +4,7 @@
 
 # %% auto #0
 __all__ = ['empty', 'custom_types', 'type_map', 'get_schema', 'minipy', 'mk_ns', 'coerce_inputs', 'resolve_nm', 'get_schema_nm',
-           'call_func', 'call_func_async', 'mk_param', 'schema2sig', 'mk_tool']
+           'call_func', 'call_func_async', 'mk_param', 'schema2sig', 'mk_tool', 'strip_tool_arg_defaults']
 
 # %% ../01_funccall.ipynb #e5ad6b86
 import inspect, ast, keyword
@@ -315,3 +315,25 @@ def mk_tool(dispfn, tool):
     fn.__name__ = fn.__qualname__ = tool.name
     fn.__annotations__ = {k: p.annotation for k, p in sig.parameters.items()}
     return fn
+
+# %% ../01_funccall.ipynb #2cd26f9a
+def _tool_defaults(tool_schemas, pname):
+    "Get default arg values from tool schemas"
+    res = {}
+    for t in tool_schemas or []:
+        sch = t.get('function') or t
+        fn = nested_idx(sch, 'name')
+        props = nested_idx(sch, pname, 'properties') or {}
+        ds = {k:v['default'] for k,v in props.items() if isinstance(v,dict) and 'default' in v}
+        if fn and ds: res[fn] = ds
+    return res
+
+def _strip_arg_defaults(args, defaults):
+    "Remove args matching schema defaults"
+    if not args or not defaults: return args
+    return {k:v for k,v in args.items() if k not in defaults or v!=defaults[k]}
+
+def strip_tool_arg_defaults(tcs, tool_schemas, pname='parameters'):
+    "Strip default args from tool call mappings"
+    defaults = _tool_defaults(tool_schemas, pname)
+    return [_strip_arg_defaults(o.get('arguments'), defaults.get(o.get('name'))) for o in tcs]
