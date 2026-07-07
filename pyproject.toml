@@ -12,7 +12,7 @@ license = {text = "Apache-2.0"}
 authors = [{name = "Jeremy Howard", email = "j@fast.ai"}]
 keywords = ['nbdev', 'jupyter', 'notebook', 'python']
 classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
-dependencies = ['fastcore>=1.12.4', 'httpx', 'ghapi', 'codesigs']
+dependencies = ['fastcore>=1.14.3', 'httpx', 'ghapi', 'codesigs']
 
 [project.urls]
 Repository = "https://github.com/AnswerDotAI/toolslm"
@@ -26,8 +26,8 @@ dev = ['ipython']
 
 
 [project.scripts]
-folder2ctx = "toolslm.xml:folder2ctx_cli"
-repo2ctx = "toolslm.xml:repo2ctx_cli"
+folder2ctx = "toolslm.xml:folder2ctx"
+repo2ctx = "toolslm.xml:repo2ctx"
 
 [tool.setuptools.dynamic]
 version = {attr = "toolslm.__version__"}
