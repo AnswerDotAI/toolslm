@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.41
+
+### New Features
+
+- async ghapi v2 compat ([#91](https://github.com/AnswerDotAI/toolslm/issues/91))
+
+
 ## 0.3.40
 
 - rename python to minipy
