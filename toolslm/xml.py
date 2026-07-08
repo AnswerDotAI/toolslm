@@ -232,8 +232,8 @@ def parse_gh_url(url):
 
 # %% ../00_xml.ipynb #d91934db
 @call_parse
-@delegates(folder2ctx, but=['include_base','title','readme_first'])
-def repo2ctx(
+@delegates(folder2ctx, but=['path','include_base','title','readme_first'])
+async def repo2ctx(
     owner:str,  # GitHub repo owner or "owner/repo" or a full github URL
     repo:str=None,   # GitHub repo name (leave empty if using "owner/repo" or URL format for owner param)
     ref:str=None,  # Git ref (branch/tag/sha) (get from URL not provided); defaults to repo's default branch
@@ -252,8 +252,8 @@ def repo2ctx(
         folder = folder or parsed.get('path')
     if repo is None: owner, repo = owner.split('/')
     api = GhApi(token=token)
-    if ref is None: ref = api.repos.get(owner, repo).default_branch
-    data = api.repos.download_tarball_archive(owner, repo, ref)
+    if ref is None: ref = (await api.repos.get(owner, repo)).default_branch
+    data = await api.repos.download_tarball_archive(owner, repo, ref)
     title = f"GitHub repository contents from {owner}/{repo}/{ref}"
     if folder: title += f'/{folder}'
     if show_filters:
