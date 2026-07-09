@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.42
+
+### New Features
+
+- Make `handle_type` public, add `union_schema` to filter non-schemable union members, and raise on missing/unrepresentable type annotations ([#92](https://github.com/AnswerDotAI/toolslm/issues/92))
+
+
 ## 0.3.41
 
 ### New Features
