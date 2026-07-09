@@ -36,14 +36,15 @@ def html2md(s:str, ignore_links=True):
     return o.handle(s)
 
 # %% ../nbs/03_download.ipynb #5e897053
-def read_html(url, # URL to read
-              sel=None, # Read only outerHTML of CSS selector `sel`
-              rm_comments=True, # Removes HTML comments
-              rm_details=True, # Removes `<details>` tags
-              multi=False, # Get all matches to `sel` or first one  
-              wrap_tag=None, #If multi, each selection wrapped with <wrap_tag>content</wrap_tag>
-              ignore_links=True,
-             ): # Cleaned markdown
+def read_html(
+    url, # URL to read
+    sel=None, # Read only outerHTML of CSS selector `sel`
+    rm_comments=True, # Removes HTML comments
+    rm_details=True, # Removes `<details>` tags
+    multi=False, # Get all matches to `sel` or first one
+    wrap_tag=None, #If multi, each selection wrapped with <wrap_tag>content</wrap_tag>
+    ignore_links=True,
+): # Cleaned markdown
     "Get `url`, optionally selecting CSS selector `sel`, and convert to clean markdown"
     page = get(url).text
     if sel:

@@ -21,9 +21,10 @@ from fastcore.script import call_parse, is_cli
 from codesigs import file_sigs
 
 # %% ../nbs/00_xml.ipynb #2795f9fc
-def json_to_xml(d:dict, # JSON dictionary to convert
-                rnm:str # Root name
-               )->str:
+def json_to_xml(
+    d:dict, # JSON dictionary to convert
+    rnm:str # Root name
+)->str:
     "Convert `d` to XML."
     root = ET.Element(rnm)
     def build_xml(data, parent):
@@ -94,19 +95,21 @@ def _add_nls(s):
     return s
 
 # %% ../nbs/00_xml.ipynb #932e8858
-def mk_doctype(content:str,  # The document content
-           src:Optional[str]=None # URL, filename, etc; defaults to `md5(content)` if not provided
-          ) -> namedtuple:
+def mk_doctype(
+    content:str,  # The document content
+    src:Optional[str]=None # URL, filename, etc; defaults to `md5(content)` if not provided
+) -> namedtuple:
     "Create a `doctype` named tuple"
     if src is None: src = hashlib.md5(content.encode()).hexdigest()[:8]
     return doctype(_add_nls(str(src).strip()), _add_nls(content.strip()))
 
 # %% ../nbs/00_xml.ipynb #15e454db
-def mk_doc(index:int,  # The document index
-           content:str,  # The document content
-           src:Optional[str]=None, # URL, filename, etc; defaults to `md5(content)` if not provided
-           **kwargs
-          ) -> tuple:
+def mk_doc(
+    index:int,  # The document index
+    content:str,  # The document content
+    src:Optional[str]=None, # URL, filename, etc; defaults to `md5(content)` if not provided
+    **kwargs
+) -> tuple:
     "Create an `ft` format tuple for a single doc in Anthropic's recommended format"
     dt = mk_doctype(content, src)
     content = Document_content(NotStr(dt.content))
@@ -114,12 +117,13 @@ def mk_doc(index:int,  # The document index
     return Document(src, content, index=index, **kwargs)
 
 # %% ../nbs/00_xml.ipynb #32237f0a
-def docs_xml(docs:list[str],  # The content of each document
-             srcs:Optional[list]=None,  # URLs, filenames, etc; each one defaults to `md5(content)` if not provided
-             prefix:bool=False, # Include Anthropic's suggested prose intro?
-             details:Optional[list]=None, # Optional list of dicts with additional attrs for each doc
-             title:str=None # Optional title attr for Documents element
-            )->str:
+def docs_xml(
+    docs:list[str],  # The content of each document
+    srcs:Optional[list]=None,  # URLs, filenames, etc; each one defaults to `md5(content)` if not provided
+    prefix:bool=False, # Include Anthropic's suggested prose intro?
+    details:Optional[list]=None, # Optional list of dicts with additional attrs for each doc
+    title:str=None # Optional title attr for Documents element
+)->str:
     "Create an XML string containing `docs` in Anthropic's recommended format"
     pre = 'Here are some documents for you to reference for your task:\n\n' if prefix else ''
     if srcs is None: srcs = [None]*len(docs)
@@ -241,7 +245,7 @@ async def repo2ctx(
     show_filters:bool=True,  # Include filter info in title?
     token:str=None,  # GitHub token (uses GITHUB_TOKEN env var if None)
     **kwargs  # Passed to `folder2ctx`
-)->Union[str,dict]:  # XML for LM context, or dict of file sizes
+)->Union[str,dict]: # XML for LM context, or dict of file sizes
     "Convert GitHub repo to XML context without cloning; prints instead of returning when run as a CLI"
     import tempfile, tarfile, io
     if owner.startswith('http'):
