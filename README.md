@@ -15,9 +15,7 @@ pip install toolslm
 
 ### Context creation
 
-toolslm has some helpers to make it easier to generate XML context from
-files, for instance
-[`folder2ctx`](https://AnswerDotAI.github.io/toolslm/xml.html#folder2ctx):
+toolslm has some helpers to make it easier to generate XML context from files, for instance [`folder2ctx`](https://AnswerDotAI.github.io/toolslm/xml.html#folder2ctx):
 
 ``` python
 print(folder2ctx('samples', prefix=False, file_glob='*.py'))
@@ -31,10 +29,7 @@ print(folder2ctx('samples', prefix=False, file_glob='*.py'))
     models = 'claude-3-opus-20240229','claude-3-sonnet-20240229','claude-3-haiku-20240307'
     </document-content></document></documents>
 
-JSON doesn’t map as nicely to XML as the `ft` data structure from
-`fastcore.xml`, but for simple XML trees it can be convenient. The
-[`json_to_xml`](https://AnswerDotAI.github.io/toolslm/xml.html#json_to_xml)
-function handles that conversion:
+JSON doesn’t map as nicely to XML as the `ft` data structure from `fastcore.xml`, but for simple XML trees it can be convenient. The [`json_to_xml`](https://AnswerDotAI.github.io/toolslm/xml.html#json_to_xml) function handles that conversion:
 
 ``` python
 a = dict(surname='Howard', firstnames=['Jeremy','Peter'],
