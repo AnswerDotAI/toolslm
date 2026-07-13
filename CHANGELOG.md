@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.43
+
+### New Features
+
+- Add pyskill, HeadingDict navigation methods (paths/at/find) ([#93](https://github.com/AnswerDotAI/toolslm/issues/93))
+
+
 ## 0.3.42
 
 ### New Features
