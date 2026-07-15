@@ -1,4 +1,4 @@
-r'''Read long Markdown documents by heading, so an agent can inspect an outline and retrieve only the sections it needs.
+r'''Read long Markdown documents by heading, so an agent can inspect an outline, retrieve only the sections it needs, or get line addresses for editing sections of a local file in place.
 
 Use this for documentation pages, specifications, reports, and other Markdown that is too long to read efficiently as one flat string. `create_heading_dict(text)` returns a `HeadingDict`: each node maps child heading titles to more nodes and keeps the complete Markdown for its section in `.text`.
 
@@ -23,8 +23,10 @@ A node's `.text` includes its heading and descendants, stopping at the next head
     session = doc.find('SessionStart').text
 
 Backtick and tilde fenced blocks are ignored when finding headings, so examples containing `#` do not pollute the outline. Duplicate sibling headings raise instead of silently overwriting a section; the same title under different parents is fine and remains addressable by path.
+
+For local files, use `create_heading_dict_file(path)` (`~` ok) rather than reading the text yourself: sections are then directly editable. Each node records `start_line` (the heading's 1-based line number in the full document), `view(nums=True)` shows the section with document-absolute line numbers, and `view(lnhashes=True)` shows `lineno|hash|` addresses in exhash's CRC-32 format - valid targets for `exhash_file` commands against that file. Plain `view()` is just `.text`. A parsed tree persists while the file may change, so after any edit call `refresh()` on the root for a fresh tree before further edits; a stale address fails loudly at exhash's hash check rather than editing the wrong line.
 '''
 
-from .md_hier import HeadingDict, create_heading_dict
+from .md_hier import HeadingDict, create_heading_dict, create_heading_dict_file
 
-__all__ = ['HeadingDict', 'create_heading_dict']
+__all__ = ['HeadingDict', 'create_heading_dict', 'create_heading_dict_file']
