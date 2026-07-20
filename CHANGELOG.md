@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.3.44
+
+### New Features
+
+- Replace inline lnhash logic with fastcore.tools.lnhash; rename lnhashes→lnhashs ([#95](https://github.com/AnswerDotAI/toolslm/issues/95))
+- Add line-addressed views, file-based parsing, and refresh to HeadingDict for exhash-compatible section editing ([#94](https://github.com/AnswerDotAI/toolslm/issues/94))
+
+
 ## 0.3.43
 
 ### New Features
