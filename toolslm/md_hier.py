@@ -8,7 +8,8 @@ Docs: https://AnswerDotAI.github.io/toolslm/md_hier.html.md"""
 __all__ = ['HeadingDict', 'create_heading_dict', 'create_heading_dict_file']
 
 # %% ../nbs/04_md_hier.ipynb #9a8d208a
-import re, zlib
+import re
+from fastcore.tools import lnhash
 from fastcore.utils import *
 
 # %% ../nbs/04_md_hier.ipynb #0ac961ea
@@ -44,11 +45,11 @@ class HeadingDict(dict):
 
     def view(self,
         nums=False, # Prefix lines with document-absolute line numbers, `lineno: `
-        lnhashes=False # Prefix `lineno|hash|` exhash addresses instead; wins over `nums`
+        lnhashs=False # Prefix `lineno|hash|` exhash addresses instead; wins over `nums`
     ):
         "Section source with document-absolute line prefixes, so an editor can address the source file directly"
         lines = self.text.splitlines()
-        if lnhashes: return PrettyString('\n'.join(f'{self.start_line+i}|{zlib.crc32(l.encode()) & 0xffff:04x}|{l}' for i,l in enumerate(lines)))
+        if lnhashs: return PrettyString('\n'.join(lnhash(self.start_line+i, l)+l for i,l in enumerate(lines)))
         if nums: return PrettyString('\n'.join(f'{self.start_line+i}: {l}' for i,l in enumerate(lines)))
         return self.text
 
