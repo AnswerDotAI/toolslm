@@ -19,10 +19,12 @@ For documentation sites with an `llms.txt`, treat it as a table of contents and 
     toc = create_heading_dict(httpx.get('https://code.claude.com/docs/llms.txt').text)
     toc.links('subagent')                        # a few `[n] Title: description` rows
     l = toc.links('Create custom subagents')[0]
-    page = create_heading_dict(toc.follow(l.n))
+    page = create_heading_dict(toc.follow(l.n), base=l.url)
     page.search('frontmatter')
 
-`links(pat='')` on any node lists that section's `Link` rows, filtered by a case-insensitive regex over each link's text, target, and description. `follow(n)` returns the target's text as a plain `str` - fetched for http(s) targets, read from disk for relative ones, resolved against `base` (recorded automatically by `create_heading_dict_file`; pass `base=` to `create_heading_dict` for text you fetched yourself - the source URL works). Do not fetch `llms-full.txt` or load every linked page unless the task genuinely needs the whole corpus.
+A `Link` exposes `.n` (its document-wide number), `.txt` (link text), `.url` (the target), `.tail` (the rest of its line, used as an llms.txt description), and `.line` (its document-absolute line number). Its repr deliberately omits `.url`; pass `l.url` as `base` when parsing a page fetched with `follow(l.n)`.
+
+`links(pat='')` on any node lists that section's `Link` rows, filtered by a case-insensitive regex over `.txt`, `.url`, and `.tail`. `follow(n)` returns the link's `.url` content as a plain `str` - fetched for http(s) URLs, read from disk for relative ones, resolved against `base` (recorded automatically by `create_heading_dict_file`; pass `base=` to `create_heading_dict` for text you fetched yourself). Do not fetch `llms-full.txt` or load every linked page unless the task genuinely needs the whole corpus.
 
 A node's `.text` includes its heading and descendants, stopping at the next heading of the same or a higher level. Retrieve shared sections separately when a specific section refers to them. Backtick and tilde fenced blocks are ignored when finding headings and links, so examples containing `#` do not pollute the outline and code samples do not join the link table.
 
