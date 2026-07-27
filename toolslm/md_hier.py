@@ -35,9 +35,12 @@ class Sections(L):
     def __getitem__(self, idx):
         res = super().__getitem__(idx)
         return Sections(res) if isinstance(idx, slice) else res
+    def _row(self, n, c=None):
+        parts = [n.addr or '.', n.title, None if c is None else f'({c})', f'[{humanize(len(n.src))}]']
+        return ' '.join(p for p in parts if p)
     def __repr__(self):
-        if self.counts: return '\n'.join(f'{n.addr or "."} {n.title} ({c})' for n,c in zip(self, self.counts))
-        return '\n'.join(f'{n.addr or "."} {n.title}' for n in self)
+        cs = self.counts or [None]*len(self)
+        return '\n'.join(self._row(n,c) for n,c in zip(self, cs))
 
 # %% ../nbs/04_md_hier.ipynb #0ac961ea
 class HeadingDict(dict):
@@ -108,6 +111,13 @@ class HeadingDict(dict):
         if lnhashs: return PrettyString('\n'.join(lnhash(self.start_line+i, l)+l for i,l in enumerate(lines)))
         if nums: return PrettyString('\n'.join(f'{self.start_line+i}: {l}' for i,l in enumerate(lines)))
         return self.src
+
+    def __repr__(self):
+        "Own `addr title [size]` line, then up to two heading levels below, as an orientation view"
+        seg = lambda a: a.count('.')+1 if a else 0
+        base = seg(self.addr)
+        rows = [n for n in self._walk() if 1 <= seg(n.addr)-base <= 2]
+        return repr(Sections([self, *rows]))
 
 # %% ../nbs/04_md_hier.ipynb #db2212b5
 def create_heading_dict(text, rm_fenced=True, base=None):
