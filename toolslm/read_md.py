@@ -2,17 +2,17 @@ r'''Read long Markdown documents by section number: search sections, follow link
 
 Use this for documentation pages, specifications, reports, and other Markdown. `create_heading_dict(text)` returns a `HeadingDict`: each node maps 1-based section numbers to child nodes, and keeps the complete Markdown for its section in `.text`, with every inline link rendered as `[text][n]` from the document-wide numbering - so displayed sections never spend tokens on URLs. Everything is addressed by short numbers you read off a listing: sections as dotted addresses like `'1.4.5'`, links by a single `n`.
 
-How much to read is a length question. Under roughly 30k characters, just display the whole `.text`: a short document read whole gives an overview nothing else matches, and the link numbering has already cheapened it. Bigger than that, `search()` is the entry point:
+Display `doc` bare to get oriented: its repr is the total size and a two-level `addr title [size]` map, so the length question answers itself. Under roughly 30k characters, display the whole `.text`; a short document read whole gives an overview nothing else matches, and the link numbering has already cheapened it. Bigger than that, `search()` is the entry point:
 
     import httpx
     from toolslm.read_md import *
 
     doc = create_heading_dict(httpx.get(url).text, base=url)
-    len(doc.text)                  # < ~30k: display doc.text and be done
-    doc.search('hooks?')           # else: `addr title (count)` rows, deepest matching sections
+    doc                            # bare repr: total size + a two-level `addr title [size]` map
+    doc.search('hooks?')           # `addr title (count) [size]` rows, deepest matching sections
     doc.at('1.4.5').text           # retrieve exactly the sections that matter
 
-`search(pat)` matches a case-insensitive regex line by line (an invalid regex matches literally) and attributes each hit to the deepest section containing it. `paths()` shows the numbered outline when structure itself is the question - `paths(2)` limits depth for a top-level overview. `at('1.4.5')` follows a dotted address from the root; `find(title)` works when a title is known and unique, and raises rather than guess at an ambiguous one. Duplicate sibling titles are fine: numbers keep every section addressable.
+`search(pat)` matches a case-insensitive regex line by line (an invalid regex matches literally) and attributes each hit to the deepest section containing it. `paths()` shows the numbered outline when structure itself is the question - `paths(2)` limits depth for a top-level overview. Every listing row ends with the section's size in brackets, a humanized character count with subsections included, so the whole-or-sections decision reads straight off the listing. `at('1.4.5')` follows a dotted address from the root; `find(title)` works when a title is known and unique, and raises rather than guess at an ambiguous one. Duplicate sibling titles are fine: numbers keep every section addressable.
 
 For documentation sites with an `llms.txt`, treat it as a table of contents and let the link numbering do the work - parse it, filter the links, follow by number, parse the page, with no URL displayed or retyped at any step:
 
