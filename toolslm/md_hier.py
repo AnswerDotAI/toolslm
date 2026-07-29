@@ -32,9 +32,6 @@ class Sections(L):
     def __init__(self, items=None, counts=None, **kw):
         super().__init__(items, **kw)
         self.counts = counts
-    def __getitem__(self, idx):
-        res = super().__getitem__(idx)
-        return Sections(res) if isinstance(idx, slice) else res
     def _row(self, n, c=None):
         parts = [n.addr or '.', n.title, None if c is None else f'({c})', f'[{humanize(len(n.src))}]']
         return ' '.join(p for p in parts if p)
