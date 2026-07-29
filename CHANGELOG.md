@@ -2,12 +2,19 @@
 
 <!-- do not remove -->
 
+## 0.3.46
+
+### New Features
+
+- Remove Sections.`__getitem__` override now that fastcore handles slicing ([#98](https://github.com/AnswerDotAI/toolslm/issues/98))
+
+
 ## 0.3.45
 
 ### New Features
 
 - Show section sizes in listings and add a HeadingDict orientation repr ([#97](https://github.com/AnswerDotAI/toolslm/pull/97)), thanks to [@jph00](https://github.com/jph00)
-- Add link numbering, section addressing, search(), and follow() to md_hier for URL-free document navigation ([#96](https://github.com/AnswerDotAI/toolslm/issues/96))
+- Add link numbering, section addressing, search(), and follow() to `md_hier` for URL-free document navigation ([#96](https://github.com/AnswerDotAI/toolslm/issues/96))
 
 
 ## 0.3.44
