@@ -10,8 +10,8 @@ __all__ = ['empty', 'custom_types', 'type_map', 'handle_type', 'union_schema', '
 import inspect, ast, keyword
 from collections import abc
 from fastcore.utils import *
-from fastcore.docments import docments
-from typing import get_origin, get_args, Optional, Union, Any
+from fastcore.docments import docments, ann_parts
+from typing import get_origin, get_args, Optional, Union, Any, Annotated
 from types import UnionType
 from typing import get_type_hints
 from inspect import Parameter, Signature
@@ -49,6 +49,7 @@ def _type_str(t):
 # %% ../nbs/01_funccall.ipynb #c141588b
 def handle_type(t, defs):
     "Convert a type annotation to JSON Schema"
+    t,_ = ann_parts(t)
     if t is empty: raise TypeError("Missing type annotation")
     if t in (object, Any): raise TypeError(f"Can't make a schema for {t!r}")
     ot = ifnone(get_origin(t), t)
@@ -305,6 +306,7 @@ def mk_param(orig, props, req, pynm=None):
         item_type = type_map.get(props['items'].get('type'), Any)
         anno = list[item_type]
     else: anno = type_map.get(props.get('type'), Any)
+    if (d := props.get('description')): anno = Annotated[anno, d]
     return Parameter(pynm, kind, default=default, annotation=anno)
 
 # %% ../nbs/01_funccall.ipynb #a8befff6
