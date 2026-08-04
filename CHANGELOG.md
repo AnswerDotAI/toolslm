@@ -4,6 +4,14 @@
 
 ## 0.3.47
 
+### New Features
+
+- Move funccall to fastcore; keep minipy in new toolslm.minipy module ([#100](https://github.com/AnswerDotAI/toolslm/issues/100))
+
+### Bugs Squashed
+
+- carry param descriptions as Annotated metadata; unwrap Annotated in `handle_type` ([#99](https://github.com/AnswerDotAI/toolslm/pull/99)), thanks to [@erikgaas](https://github.com/erikgaas)
+
 
 ## 0.3.46
 
