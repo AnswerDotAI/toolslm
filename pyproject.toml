@@ -18,9 +18,6 @@ dependencies = ['fastcore>=2.1.18', 'httpx', 'ghapi>=2.0.0', 'codesigs']
 Repository = "https://github.com/AnswerDotAI/toolslm"
 Documentation = "https://AnswerDotAI.github.io/toolslm"
 
-[project.entry-points.pyskills]
-"toolslm.read_md" = "toolslm.read_md"
-
 [project.entry-points.nbdev]
 toolslm = "toolslm._modidx:d"
 
