@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.3.48
+
+### New Features
+
+- Remove `md_hier` and `read_md` modules, replaced by exhash ([#101](https://github.com/AnswerDotAI/toolslm/issues/101))
+
+
 ## 0.3.47
 
 ### New Features
