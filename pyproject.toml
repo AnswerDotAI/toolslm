@@ -23,6 +23,7 @@ toolslm = "toolslm._modidx:d"
 
 [project.optional-dependencies]
 dev = ['ipython']
+download = ['html2text', 'beautifulsoup4', 'lxml', 'cloudscraper']
 
 
 [project.scripts]
