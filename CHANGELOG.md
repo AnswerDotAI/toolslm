@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.3.49
+
+### New Features
+
+- Add `read_url` and `scrape_url` for Cloudflare-aware fetching with section extraction and TeX math; html2md fences code and resolves URLs ([#103](https://github.com/AnswerDotAI/toolslm/issues/103))
+
+### Bugs Squashed
+
+- Update CLI flags for fastcore.script hyphenation ([#102](https://github.com/AnswerDotAI/toolslm/pull/102)), thanks to [@jph00](https://github.com/jph00)
+
+
 ## 0.3.48
 
 ### New Features
